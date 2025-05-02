@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <h1>this is a home page</h1>
-      <Button>add</Button>
+      <Button color="primary">add</Button>
     </>
   );
 }
