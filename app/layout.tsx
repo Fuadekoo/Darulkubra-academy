@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { UiProvider } from "../components/ui/heroui";
+import { UIProviders } from "@/components/ui/HeroUiProvider";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -27,7 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <UIProviders>{children}</UIProviders>
       </body>
     </html>
   );
