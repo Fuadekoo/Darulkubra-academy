@@ -1,6 +1,6 @@
 import React from "react";
 import UserLayout from "@/components/ui/userLayout";
-import { Home } from "lucide-react";
+import { Home, PersonStandingIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "../../../../lib/auth";
 export default async function layout({
@@ -18,14 +18,19 @@ export default async function layout({
       <UserLayout
         menu={[
           {
-            label: "home",
-            url: "",
+            label: "dashboard",
+            url: "dashboard",
             icon: <Home className="size-4" />,
           },
           {
-            label: "school",
-            url: "school",
-            icon: <Home className="size-4" />,
+            label: "student",
+            url: "student",
+            icon: <PersonStandingIcon className="size-4" />,
+          },
+          {
+            label: "teacher",
+            url: "teacher",
+            icon: <PersonStandingIcon className="size-4" />,
           },
         ]}
       >

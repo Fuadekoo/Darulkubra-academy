@@ -17,13 +17,13 @@ export default async function layout({
       <UserLayout
         menu={[
           {
-            label: "home",
-            url: "",
+            label: "dashboard",
+            url: "dashboard",
             icon: <Home className="size-4" />,
           },
           {
-            label: "school",
-            url: "school",
+            label: "analytics",
+            url: "analytics",
             icon: <Home className="size-4" />,
           },
         ]}
