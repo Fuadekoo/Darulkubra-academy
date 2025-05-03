@@ -16,7 +16,7 @@ datasource db {
 model Admin {
   id        String   @id @default(cuid())
   name      String
-  email     String   @unique
+  phoneno   String @unique
   passcode  String
   createdAt DateTime @default(now())
 }
@@ -24,7 +24,7 @@ model Admin {
 model Teacher {
   id        String   @id @default(cuid())
   name      String
-  email     String   @unique
+  phoneno   String @unique
   passcode  String
   isActive  Boolean  @default(true)
   courses   Course[]
@@ -34,8 +34,8 @@ model Teacher {
 model Student {
   id        String   @id @default(cuid())
   name      String
+  phoneno   String   @unique
   passcode  String   @unique
-  phoneNo   String
   status    Boolean  @default(true)
   startDate DateTime
   chatId    String

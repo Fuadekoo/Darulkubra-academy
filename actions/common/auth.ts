@@ -11,9 +11,11 @@ export async function authenticate(
   if (!data) return undefined;
   try {
     await signIn("credentials", { ...data, redirect: false });
+    console.log("sign in successfully");
   } catch (error) {
+    console.log("error");
     return "something was wrong";
   }
 
-  redirect("/en/student");
+  redirect("/en/dashboard");
 }

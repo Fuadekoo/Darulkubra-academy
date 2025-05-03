@@ -8,14 +8,14 @@ import { Session } from "next-auth";
 declare module "next-auth" {
   interface User {
     id?: string | undefined;
-    phone?: string | null | undefined;
+    phoneno?: string | null | undefined;
     passcode?: string | undefined;
     role?: string | null | undefined; // Added role
   }
   interface Session {
     user: {
       id?: string;
-      phone?: string | null;
+      phoneno?: string | null;
       role?: string | null;
       // ...other properties
     };
@@ -25,7 +25,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
-    phone: string;
+    phoneno: string;
     role?: string | null; // Added role
   }
 }
@@ -34,47 +34,48 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        phone: { label: "Phone", type: "text" },
+        phoneno: { label: "Phone", type: "text" },
         passcode: { label: "passcode", type: "passcode" },
       },
       async authorize(credentials) {
-        const { phone, passcode } = credentials || {};
-        if (!phone || !passcode)
+        const { phoneno, passcode } = credentials || {};
+        if (!phoneno || !passcode)
           throw new Error("Phone and password required.");
+        let role = null;
 
         let user = await prisma.student.findFirst({
-          where: { phone: phone as string },
-          select: { id: true, phone: true, password: true, role: true },
+          where: { phoneno: phoneno as string },
+          select: { id: true, phoneno: true, passcode: true },
         });
 
         if (user) {
-          user.role = "student";
+          role = "student";
         } else {
           user = await prisma.teacher.findFirst({
-            where: { phone: phone as string },
-            select: { id: true, phone: true, password: true, role: true },
+            where: { phoneno: phoneno as string },
+            select: { id: true, phoneno: true, passcode: true },
           });
 
           if (user) {
-            user.role = "teacher";
+            role = "teacher";
           } else {
             user = await prisma.admin.findFirst({
-              where: { phone: phone as string },
-              select: { id: true, phone: true, password: true, role: true },
+              where: { phoneno: phoneno as string },
+              select: { id: true, phoneno: true, passcode: true },
             });
 
             if (user) {
-              user.role = "admin";
+              role = "admin";
             }
           }
         }
 
         if (!user) throw new Error("Invalid user.");
 
-        const valid = await bcrypt.compare(passcode as string, user.password);
+        const valid = await bcrypt.compare(passcode as string, user.passcode);
         if (!valid) throw new Error("Invalid password.");
 
-        return { id: user.id, phone: user.phone, role: user.role ?? null };
+        return { id: user.id, phone: user.phoneno, role: role ?? null };
       },
     }),
   ],
@@ -89,14 +90,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id ?? "";
-        token.phone = user.phone ?? "";
+        token.phone = user.phoneno ?? "";
         token.role = user.role ?? null;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
-      session.user.phone = token.phone;
+      session.user.phoneno = token.phoneno;
       session.user.role = token.role;
       return session;
     },

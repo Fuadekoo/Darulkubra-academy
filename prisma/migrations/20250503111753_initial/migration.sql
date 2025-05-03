@@ -2,11 +2,11 @@
 CREATE TABLE `Admin` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
+    `phoneno` VARCHAR(191) NOT NULL,
     `passcode` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `Admin_email_key`(`email`),
+    UNIQUE INDEX `Admin_phoneno_key`(`phoneno`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -14,12 +14,12 @@ CREATE TABLE `Admin` (
 CREATE TABLE `Teacher` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
+    `phoneno` VARCHAR(191) NOT NULL,
     `passcode` VARCHAR(191) NOT NULL,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `Teacher_email_key`(`email`),
+    UNIQUE INDEX `Teacher_phoneno_key`(`phoneno`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -27,13 +27,14 @@ CREATE TABLE `Teacher` (
 CREATE TABLE `Student` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
+    `phoneno` VARCHAR(191) NOT NULL,
     `passcode` VARCHAR(191) NOT NULL,
-    `phoneNo` VARCHAR(191) NOT NULL,
     `status` BOOLEAN NOT NULL DEFAULT true,
     `startDate` DATETIME(3) NOT NULL,
     `chatId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    UNIQUE INDEX `Student_phoneno_key`(`phoneno`),
     UNIQUE INDEX `Student_passcode_key`(`passcode`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
