@@ -1,9 +1,9 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 import { DefaultJWT } from "next-auth/jwt";
 import { Session } from "next-auth";
+import { loginSchema } from "@/lib/zodSchema";
 
 declare module "next-auth" {
   interface User {
@@ -34,17 +34,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        phoneno: { label: "Phone", type: "text" },
-        passcode: { label: "passcode", type: "passcode" },
+        phoneno: { label: "phoneno", type: "text" },
+        passcode: { label: "passcode", type: "number" },
       },
       async authorize(credentials) {
-        const { phoneno, passcode } = credentials || {};
-        if (!phoneno || !passcode)
-          throw new Error("Phone and password required.");
+        
+        const { phoneno, passcode } = await loginSchema.parseAsync(credentials);
         let role = null;
-
         let user = await prisma.student.findFirst({
-          where: { phoneno: phoneno as string },
+          where: { phoneno },
           select: { id: true, phoneno: true, passcode: true },
         });
 
@@ -52,7 +50,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           role = "student";
         } else {
           user = await prisma.teacher.findFirst({
-            where: { phoneno: phoneno as string },
+            where: { phoneno },
             select: { id: true, phoneno: true, passcode: true },
           });
 
@@ -60,7 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             role = "teacher";
           } else {
             user = await prisma.admin.findFirst({
-              where: { phoneno: phoneno as string },
+              where: { phoneno },
               select: { id: true, phoneno: true, passcode: true },
             });
 
@@ -69,13 +67,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
           }
         }
+        // console.log("meeeeeee11111");
 
-        if (!user) throw new Error("Invalid user.");
+        if (!user) throw new Error("Invalid phoneno");
 
-        const valid = await bcrypt.compare(passcode as string, user.passcode);
-        if (!valid) throw new Error("Invalid password.");
+        console.log("DB passcode:", user.passcode);
+        console.log("Input passcode:", passcode);
+        if (!(passcode == user.passcode)) {
+          console.log("Invalid password.");
+          throw new Error("Invalid password.");
+        }
 
-        return { id: user.id, phone: user.phoneno, role: role ?? null };
+        return { id: user.id, phoneno: user.phoneno, role: role ?? null };
       },
     }),
   ],
@@ -90,7 +93,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id ?? "";
-        token.phone = user.phoneno ?? "";
+        token.phoneno = user.phoneno ?? "";
         token.role = user.role ?? null;
       }
       return token;
@@ -100,18 +103,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.phoneno = token.phoneno;
       session.user.role = token.role;
       return session;
-    },
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-  cookies: {
-    sessionToken: {
-      name: "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-      },
     },
   },
 });

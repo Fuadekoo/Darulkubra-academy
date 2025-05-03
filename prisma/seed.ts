@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
     data: {
       name: "admin",
       phoneno: "0911223344",
-      passcode: await bcrypt.hash("admin123", 12),
+      passcode: "admin123",
     },
   });
 
@@ -16,7 +16,7 @@ import bcrypt from "bcryptjs";
     data: {
       name: "teacher",
       phoneno: "0910737199",
-      passcode: await bcrypt.hash("teacher123", 12),
+      passcode: "teacher123",
       isActive: true,
     },
   });
@@ -25,7 +25,7 @@ import bcrypt from "bcryptjs";
   await prisma.student.create({
     data: {
       name: "student",
-      passcode: await bcrypt.hash("student1", 12),
+      passcode: "student1",
       phoneno: "0910203040",
       status: true,
       startDate: new Date(),

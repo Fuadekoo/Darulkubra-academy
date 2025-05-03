@@ -20,8 +20,8 @@ function Page() {
       ,
       (state) => {
         if (state) {
-          addToast({ title: state, color: "danger" });
-          action();
+          // addToast({ title: state, color: "danger" });
+          // action();
         }
       },
     ]);
@@ -32,7 +32,7 @@ function Page() {
           action(data);
         })}
       >
-        <input {...register("phone")} placeholder="Phone" />
+        <input {...register("phoneno")} placeholder="Phone" />
         <input {...register("passcode")} placeholder="Passcode" />
         <button type="submit" disabled={isLoading}>
           {isLoading ? "Loading..." : "Sign In"}
