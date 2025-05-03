@@ -3,12 +3,22 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 import { DefaultJWT } from "next-auth/jwt";
+import { Session } from "next-auth";
 
 declare module "next-auth" {
   interface User {
     id?: string | undefined;
     phone?: string | null | undefined;
-    role?: string | null | undefined;
+    passcode?: string | undefined;
+    role?: string | null | undefined; // Added role
+  }
+  interface Session {
+    user: {
+      id?: string;
+      phone?: string | null;
+      role?: string | null;
+      // ...other properties
+    };
   }
 }
 
@@ -16,7 +26,7 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
     phone: string;
-    role?: string | null;
+    role?: string | null; // Added role
   }
 }
 
@@ -25,19 +35,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       credentials: {
         phone: { label: "Phone", type: "text" },
-        password: { label: "Password", type: "password" },
+        passcode: { label: "passcode", type: "passcode" },
       },
-      async authorize({ phone, password }) {
-        if (!phone || !password)
+      async authorize(credentials) {
+        const { phone, passcode } = credentials || {};
+        if (!phone || !passcode)
           throw new Error("Phone and password required.");
 
-        const user = await prisma.user.findFirst({
+        let user = await prisma.student.findFirst({
           where: { phone: phone as string },
+          select: { id: true, phone: true, password: true, role: true },
         });
+
+        if (user) {
+          user.role = "student";
+        } else {
+          user = await prisma.teacher.findFirst({
+            where: { phone: phone as string },
+            select: { id: true, phone: true, password: true, role: true },
+          });
+
+          if (user) {
+            user.role = "teacher";
+          } else {
+            user = await prisma.admin.findFirst({
+              where: { phone: phone as string },
+              select: { id: true, phone: true, password: true, role: true },
+            });
+
+            if (user) {
+              user.role = "admin";
+            }
+          }
+        }
 
         if (!user) throw new Error("Invalid user.");
 
-        const valid = await bcrypt.compare(password as string, user.password);
+        const valid = await bcrypt.compare(passcode as string, user.password);
         if (!valid) throw new Error("Invalid password.");
 
         return { id: user.id, phone: user.phone, role: user.role ?? null };
@@ -46,7 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
 
   pages: {
-    signIn: "/login",
+    signIn: "/signin",
   },
   session: {
     strategy: "jwt",

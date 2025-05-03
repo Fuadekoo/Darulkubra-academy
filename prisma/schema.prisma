@@ -10,7 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -18,7 +18,7 @@ model Admin {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
-  password  String
+  passcode  String
   createdAt DateTime @default(now())
 }
 
@@ -26,7 +26,7 @@ model Teacher {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
-  password  String
+  passcode  String
   isActive  Boolean  @default(true)
   courses   Course[]
   createdAt DateTime @default(now())
