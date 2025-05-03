@@ -14,10 +14,17 @@ export async function authenticate(
 
     console.log("sign in successfully");
   } catch (error) {
-    console.log("hy");
-    console.log("error", JSON.parse(JSON.stringify(error)));
     return "something was wrong";
   }
 
   redirect("/en/student");
+}
+
+export async function kickoff() {
+  try {
+    await signOut({ redirect: false });
+  } catch {
+    return "unable to signout";
+  }
+  redirect("/en");
 }
