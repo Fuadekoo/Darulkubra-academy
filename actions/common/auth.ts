@@ -19,5 +19,5 @@ export async function authenticate(
     return "something was wrong";
   }
 
-  redirect("/en/dashboard");
+  redirect("/en/student");
 }

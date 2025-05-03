@@ -1,7 +1,8 @@
+import { redirect } from "next/navigation";
 import React from "react";
 
-function Page() {
-  return <div>this is a teacher page</div>;
-}
+export default function Page() {
+  redirect("/en/teacher/course");
 
-export default Page;
+  return <div className="grid place-content-center">teacher dashboard</div>;
+}
