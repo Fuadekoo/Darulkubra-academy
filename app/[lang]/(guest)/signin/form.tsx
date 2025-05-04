@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -56,7 +55,7 @@ function LoginForm() {
           })}
         >
           <div>
-            <h1 className="text-3xl font-bold underline bg-amber-700">hello</h1>
+            {/* <h1 className="text-3xl font-bold underline bg-amber-700">hello</h1> */}
             <label className="block mb-1">Phone Number</label>
             <Input
               {...register("phoneno")}
@@ -71,7 +70,7 @@ function LoginForm() {
           </div>
           <div>
             <label className="block mb-1">Passcode</label>
-            <Input
+            <PasswordInput
               {...register("passcode")}
               placeholder="*********"
               type="password"
