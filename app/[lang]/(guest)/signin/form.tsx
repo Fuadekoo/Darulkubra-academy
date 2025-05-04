@@ -46,7 +46,7 @@ function LoginForm() {
     <Card className="w-full max-w-sm space-y-4">
       <CardHeader>
         <CardTitle>Login</CardTitle>
-        <CardDescription>Login to your support me account</CardDescription>
+        <CardDescription>Login to your account</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -55,7 +55,18 @@ function LoginForm() {
           })}
         >
           <div>
-            {/* <h1 className="text-3xl font-bold underline bg-amber-700">hello</h1> */}
+            {/* <h1 className="bg-dominant text-accent">hello</h1> */}
+            <button className="bg-dominant-900 text-dominant-foreground p-2 rounded">
+              THEMED BUTTON
+            </button>
+
+            <div className="bg-complementary-800 text-white p-4">
+              COMPLEMENTARY SECTION
+            </div>
+
+            <span className="bg-accent-400 text-black dark:text-white px-2 py-1">
+              ACCENT TEXT
+            </span>
             <label className="block mb-1">Phone Number</label>
             <Input
               {...register("phoneno")}

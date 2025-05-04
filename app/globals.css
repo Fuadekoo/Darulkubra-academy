@@ -1,14 +1,73 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+/* styles/globals.css */
 :root {
-  --accent1: #845ec2;
-  --accent2: #4e8397;
-  --accent3: #d5cabd;
+  /* dominant color scale (light) */
+  --dominant-100: #f6f4e7;
+  --dominant-200: #ede9d1;
+  --dominant-300: #cac4a6;
+  --dominant-400: #968f74;
+  --dominant-500: #504b38;
+  --dominant-600: #443e28;
+  --dominant-700: #39321c;
+  --dominant-800: #2e2611;
+  --dominant-900: #261e0a;
+
+  /* complementary color scale (light) */
+  --complementary-100: #e0f4f9;
+  --complementary-200: #b2dbe8;
+  --complementary-300: #84c3d7;
+  --complementary-400: #4e8397;
+  --complementary-500: #3a6c82;
+  --complementary-600: #2e566a;
+  --complementary-700: #224053;
+  --complementary-800: #172a3b;
+  --complementary-900: #0b141e;
+
+  /* accent color scale (light) */
+  --accent-100: #f3e9fb;
+  --accent-200: #dfc4f6;
+  --accent-300: #c99def;
+  --accent-400: #b076e7;
+  --accent-500: #845ec2;
+  --accent-600: #6a47a4;
+  --accent-700: #523588;
+  --accent-800: #3a256b;
+  --accent-900: #25164f;
 }
 
 .dark {
-  --accent1: #d5cabd;
-  --accent2: #4e8397;
-  --accent3: #845ec2;
+  /* dominant color scale (dark) */
+  --dominant-100: #261e0a;
+  --dominant-200: #2e2611;
+  --dominant-300: #39321c;
+  --dominant-400: #443e28;
+  --dominant-500: #504b38;
+  --dominant-600: #968f74;
+  --dominant-700: #cac4a6;
+  --dominant-800: #ede9d1;
+  --dominant-900: #f6f4e7;
+
+  /* complementary color scale (dark) */
+  --complementary-100: #0b141e;
+  --complementary-200: #172a3b;
+  --complementary-300: #224053;
+  --complementary-400: #2e566a;
+  --complementary-500: #3a6c82;
+  --complementary-600: #4e8397;
+  --complementary-700: #84c3d7;
+  --complementary-800: #b2dbe8;
+  --complementary-900: #e0f4f9;
+
+  /* accent color scale (dark) */
+  --accent-100: #25164f;
+  --accent-200: #3a256b;
+  --accent-300: #523588;
+  --accent-400: #6a47a4;
+  --accent-500: #845ec2;
+  --accent-600: #b076e7;
+  --accent-700: #c99def;
+  --accent-800: #dfc4f6;
+  --accent-900: #f3e9fb;
 }
