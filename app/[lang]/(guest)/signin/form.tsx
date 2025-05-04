@@ -44,19 +44,49 @@ function LoginForm() {
       },
     ]);
   return (
-    <>
-      <form
-        onSubmit={handleSubmit((data) => {
-          action(data);
-        })}
-      >
-        <input {...register("phoneno")} placeholder="Phone" />
-        <input {...register("passcode")} placeholder="Passcode" />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? "Loading..." : "Sign In"}
-        </button>
-      </form>
-    </>
+    <Card className="w-full max-w-sm space-y-4">
+      <CardHeader>
+        <CardTitle>Login</CardTitle>
+        <CardDescription>Login to your support me account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={handleSubmit((data) => {
+            action(data);
+          })}
+        >
+          <div>
+            <label className="block mb-1">Phone Number</label>
+            <Input
+              {...register("phoneno")}
+              placeholder="09xxxxxxxx"
+              type="text"
+            />
+            {formState.errors.phoneno && (
+              <span className="text-red-500 text-xs">
+                {formState.errors.phoneno.message}
+              </span>
+            )}
+          </div>
+          <div>
+            <label className="block mb-1">Passcode</label>
+            <Input
+              {...register("passcode")}
+              placeholder="*********"
+              type="password"
+            />
+            {formState.errors.passcode && (
+              <span className="text-red-500 text-xs">
+                {formState.errors.passcode.message}
+              </span>
+            )}
+          </div>
+          <Button type="submit" className="mt-4" disabled={isLoading}>
+            {isLoading ? "Loading..." : "Sign In"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 
