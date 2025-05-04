@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { UiProvider } from "../components/ui/heroui";
-import { UIProviders } from "@/components/ui/HeroUiProvider";
+import { UiProvider } from "../components/custom/heroui";
+import { UIProviders } from "@/components/custom/HeroUiProvider";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 

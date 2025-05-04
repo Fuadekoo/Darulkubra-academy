@@ -1,5 +1,5 @@
 import React from "react";
-import UserLayout from "@/components/ui/userLayout";
+import UserLayout from "@/components/custom/userLayout";
 import { Home, Search } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "../../../../lib/auth";

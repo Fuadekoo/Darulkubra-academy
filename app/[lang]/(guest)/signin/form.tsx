@@ -1,7 +1,28 @@
 "use client";
 import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+// import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/zodSchema";
 import useAction from "@/hooks/useAction";
@@ -23,7 +44,7 @@ function LoginForm() {
       },
     ]);
   return (
-    <div>
+    <>
       <form
         onSubmit={handleSubmit((data) => {
           action(data);
@@ -35,7 +56,7 @@ function LoginForm() {
           {isLoading ? "Loading..." : "Sign In"}
         </button>
       </form>
-    </div>
+    </>
   );
 }
 
