@@ -1,12 +1,14 @@
 "use client";
 import React from "react";
 import { Button } from "@heroui/button";
+import CourseList from "./[lang]/(user)/teacher/course/courseList";
 
 export default function Home() {
   return (
     <>
-      <h1>this is a home page</h1>
-      <Button color="primary">add</Button>
+      <h1>What to learn next</h1>
+      <p>Recommended for you</p>
+      <CourseList />
     </>
   );
 }
