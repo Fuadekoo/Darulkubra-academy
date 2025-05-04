@@ -56,17 +56,17 @@ function LoginForm() {
         >
           <div>
             {/* <h1 className="bg-dominant text-accent">hello</h1> */}
-            <button className="bg-dominant-900 text-dominant-foreground p-2 rounded">
+            {/* <button className="bg-dominant-700 text-dominant-foreground p-2 rounded">
               THEMED BUTTON
             </button>
 
-            <div className="bg-complementary-800 text-white p-4">
+            <div className="bg-complementary text-white p-4">
               COMPLEMENTARY SECTION
             </div>
 
-            <span className="bg-accent-400 text-black dark:text-white px-2 py-1">
+            <span className="bg-accent text-black dark:text-white px-2 py-1">
               ACCENT TEXT
-            </span>
+            </span> */}
             <label className="block mb-1">Phone Number</label>
             <Input
               {...register("phoneno")}

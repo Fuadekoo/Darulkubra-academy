@@ -4,6 +4,7 @@
 /* styles/globals.css */
 :root {
   /* dominant color scale (light) */
+  --dominant: #504b38;
   --dominant-100: #f6f4e7;
   --dominant-200: #ede9d1;
   --dominant-300: #cac4a6;
@@ -15,6 +16,7 @@
   --dominant-900: #261e0a;
 
   /* complementary color scale (light) */
+  --complementary: #3a6c82;
   --complementary-100: #e0f4f9;
   --complementary-200: #b2dbe8;
   --complementary-300: #84c3d7;
@@ -26,6 +28,7 @@
   --complementary-900: #0b141e;
 
   /* accent color scale (light) */
+  --accent: #845ec2;
   --accent-100: #f3e9fb;
   --accent-200: #dfc4f6;
   --accent-300: #c99def;
@@ -39,6 +42,7 @@
 
 .dark {
   /* dominant color scale (dark) */
+  --dominant: #504b38;
   --dominant-100: #261e0a;
   --dominant-200: #2e2611;
   --dominant-300: #39321c;
@@ -50,6 +54,7 @@
   --dominant-900: #f6f4e7;
 
   /* complementary color scale (dark) */
+  --complementary: #3a6c82;
   --complementary-100: #0b141e;
   --complementary-200: #172a3b;
   --complementary-300: #224053;
@@ -61,6 +66,7 @@
   --complementary-900: #e0f4f9;
 
   /* accent color scale (dark) */
+  --accent: #845ec2;
   --accent-100: #25164f;
   --accent-200: #3a256b;
   --accent-300: #523588;

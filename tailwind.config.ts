@@ -11,6 +11,7 @@ const config: Config = {
     extend: {
       colors: {
         dominant: {
+          DEFAULT: "var(--dominant)",
           100: "var(--dominant-100)",
           200: "var(--dominant-200)",
           300: "var(--dominant-300)",
@@ -22,6 +23,7 @@ const config: Config = {
           900: "var(--dominant-900)",
         },
         complementary: {
+          DEFAULT: "var(--complementary)",
           100: "var(--complementary-100)",
           200: "var(--complementary-200)",
           300: "var(--complementary-300)",
@@ -33,6 +35,7 @@ const config: Config = {
           900: "var(--complementary-900)",
         },
         accent: {
+          DEFAULT: "var(--accent)",
           100: "var(--accent-100)",
           200: "var(--accent-200)",
           300: "var(--accent-300)",
