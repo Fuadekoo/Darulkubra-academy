@@ -2,6 +2,7 @@
 import React from "react";
 import { useState } from "react";
 import Link from "next/link";
+import { LightDarkToggle } from "../ui/light-dark-toggle";
 
 export default function UserLayout({
   menu,
@@ -45,13 +46,18 @@ function Sidebar({
     <div
       className={`${
         sidebar ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 transition-transform duration-300 lg:block bg-white shadow-lg rounded-xl p-2`}
+      } lg:translate-x-0 transition-transform duration-300 lg:block bg-complementary-400 shadow-lg rounded-xl p-4`}
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
+        <h1>hello fuad</h1>
         {menu.map((item) => (
-          <Link key={item.label} href={item.url}>
+          <Link
+            key={item.label}
+            href={item.url}
+            className="flex items-center gap-2"
+          >
             {item.icon}
-            {item.label}
+            <span>{item.label}</span>
           </Link>
         ))}
       </div>
@@ -65,11 +71,12 @@ function Header({
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
-    <div className="flex justify-between items-center p-2 bg-white shadow-lg rounded-xl">
+    <div className="flex justify-between items-center p-3 bg-accent-300 shadow-lg rounded-xl">
       <button onClick={() => setSidebar((prev) => !prev)}>
         Toggle Sidebar
       </button>
       <h1 className="text-xl font-bold">Header</h1>
+      <LightDarkToggle />
     </div>
   );
 }
