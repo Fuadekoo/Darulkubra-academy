@@ -22,6 +22,16 @@ export default async function layout({
             icon: <Home className="size-4" />,
           },
           {
+            label: "course",
+            url: "course",
+            icon: <Home className="size-4" />,
+          },
+          {
+            label: "student",
+            url: "student",
+            icon: <Home className="size-4" />,
+          },
+          {
             label: "analytics",
             url: "analytics",
             icon: <Home className="size-4" />,

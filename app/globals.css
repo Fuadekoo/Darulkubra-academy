@@ -1,2 +1,14 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
+
+:root {
+  --accent1: #845ec2;
+  --accent2: #4e8397;
+  --accent3: #d5cabd;
+}
+
+.dark {
+  --accent1: #d5cabd;
+  --accent2: #4e8397;
+  --accent3: #845ec2;
+}
