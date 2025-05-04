@@ -110,3 +110,43 @@ export async function getQuestions(quizId: string) {
     throw new Error("Failed to get questions");
   }
 }
+
+export async function deleteQuestion(id: string) {
+  const teacherId = await isAuthorized("teacher");
+  if (!teacherId) {
+    throw new Error("Unauthorized");
+  }
+  try {
+    // check if question belongs to teacher
+    const question = await prisma.question.findUnique({
+      where: { id },
+      select: {
+        quiz: {
+          select: {
+            lesson: {
+              select: {
+                course: {
+                  select: { teacherId: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!question || question.quiz.lesson.course.teacherId !== teacherId) {
+      throw new Error(
+        "Unauthorized: You can only delete questions from your own quiz"
+      );
+    }
+
+    // delete question
+    const deletedQuestion = await prisma.question.delete({
+      where: { id },
+    });
+    return deletedQuestion;
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    throw new Error("Failed to delete question");
+  }
+}
