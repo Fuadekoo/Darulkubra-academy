@@ -65,6 +65,7 @@ CREATE TABLE `Lesson` (
 -- CreateTable
 CREATE TABLE `Quiz` (
     `id` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
     `lessonId` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `Quiz_lessonId_key`(`lessonId`),

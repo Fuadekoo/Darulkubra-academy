@@ -70,6 +70,7 @@ model Lesson {
 // QUIZ STRUCTURE
 model Quiz {
   id        String     @id @default(cuid())
+  title     String
   lesson    Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   lessonId  String     @unique
   questions Question[]
