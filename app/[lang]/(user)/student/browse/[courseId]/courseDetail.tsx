@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import Exam from "./exam";
 import { ArrowLeft, List, CheckCircle } from "lucide-react";
 import Overview from "./overview";
 import useAction from "@/hooks/useAction";
@@ -16,7 +15,6 @@ export default function CourseDetail() {
     courseId
   );
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
-  const [showExam, setShowExam] = useState(false);
   const [showSections, setShowSections] = useState(false);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(
     new Set()
@@ -29,14 +27,18 @@ export default function CourseDetail() {
         newSet.add(courses.lessons[currentLessonIndex].id);
         return newSet;
       });
-      setShowExam(true);
     }
   };
 
-  const handleExamComplete = () => {
-    setShowExam(false);
+  const handleNextLesson = () => {
     if (courses?.lessons && currentLessonIndex < courses.lessons.length - 1) {
       setCurrentLessonIndex(currentLessonIndex + 1);
+    }
+  };
+
+  const handlePreviousLesson = () => {
+    if (currentLessonIndex > 0) {
+      setCurrentLessonIndex(currentLessonIndex - 1);
     }
   };
 
@@ -48,32 +50,9 @@ export default function CourseDetail() {
     return <div className="p-6">Course not found</div>;
   }
 
-  if (showExam && courses?.lessons?.[currentLessonIndex]) {
-    const currentLesson = courses.lessons[currentLessonIndex];
-    return (
-      <div className="p-6 max-w-2xl mx-auto">
-        <button
-          className="flex items-center gap-2 mb-4 text-blue-600 hover:underline"
-          onClick={() => setShowExam(false)}
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Lesson
-        </button>
-        <Exam
-          lessonId={currentLesson.id}
-          questions={currentLesson.question.map((q) => ({
-            id: q.id,
-            question: q.question,
-            options: q.questionOptions.map((opt) => ({ id: opt.id, option: opt.option })),
-            answer: q.questionAnswer[0]?.answerId ?? "",
-          }))}
-          onComplete={handleExamComplete}
-        />
-      </div>
-    );
-  }
-
   const currentLesson = courses.lessons?.[currentLessonIndex];
+  const hasNextLesson = currentLessonIndex < courses.lessons.length - 1;
+  const hasPreviousLesson = currentLessonIndex > 0;
 
   return (
     <div className="p-6 max-w-4xl mx-auto relative">
@@ -126,25 +105,48 @@ export default function CourseDetail() {
                   allowFullScreen
                 />
               </div>
-              <button
-                className={`mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-lg transition ${
-                  completedLessons.has(currentLesson.id)
-                    ? "bg-green-600 text-white"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                }`}
-                onClick={handleCompleteLesson}
-                disabled={completedLessons.has(currentLesson.id)}
-              >
-                {completedLessons.has(currentLesson.id) ? (
-                  <>
-                    <CheckCircle className="w-5 h-5" />
-                    Lesson Completed
-                  </>
-                ) : (
-                  "Complete Lesson"
-                )}
-              </button>
-              <Overview />
+              <div className="mt-4 flex items-center justify-between">
+                <button
+                  className={`mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-lg transition ${
+                    completedLessons.has(currentLesson.id)
+                      ? "bg-green-600 text-white"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
+                  onClick={handleCompleteLesson}
+                  disabled={completedLessons.has(currentLesson.id)}
+                >
+                  {completedLessons.has(currentLesson.id) ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Lesson Completed
+                    </>
+                  ) : (
+                    "Complete Lesson"
+                  )}
+                </button>
+                <div className="flex gap-2">
+                  {hasPreviousLesson && (
+                    <button
+                      onClick={handlePreviousLesson}
+                      className="mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-lg transition bg-gray-200 hover:bg-gray-300 text-gray-800"
+                    >
+                      Previous
+                    </button>
+                  )}
+                  {hasNextLesson && (
+                    <button
+                      onClick={handleNextLesson}
+                      className="mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-lg transition bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
+              </div>
+              <Overview
+                currentLessonId={currentLesson.id}
+                onLessonComplete={handleNextLesson}
+              />
             </>
           )}
         </div>

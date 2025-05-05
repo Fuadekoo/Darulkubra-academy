@@ -100,6 +100,24 @@ export async function checkAnswerSubmitted(questionId: string) {
     console.error("Error checking answer submission:", error);
     throw new Error("Failed to check answer submission");
   }
+
+}
+export async function checkLessonExamComplete(lessonId: string): Promise<boolean> {
+  const studentId = await isAuthorized("student");
+  if (!studentId) throw new Error("Unauthorized: Student ID is undefined");
+
+  try {
+    const studentQuiz = await prisma.studentQuiz.findFirst({
+      where: {
+        question: { lessonId: lessonId },
+        studentId: studentId,
+      },
+    });
+    return studentQuiz !== null;
+  } catch (error) {
+    console.error("Error checking exam completion:", error);
+    throw new Error("Failed to check exam completion");
+  }
 }
 
 export async function correctAnswer(lessonId: string) {

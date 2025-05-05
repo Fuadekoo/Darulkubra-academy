@@ -1,7 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useParams } from "next/navigation";
+import useAction from "@/hooks/useAction";
+import { courseDetail } from "@/actions/student/course";
+import Exam from "./exam";
 
 const course = {
   title: "Figma from A to Z",
@@ -18,10 +22,62 @@ const course = {
   ],
 };
 
-const tabs = ["Overview", "Author", "FAQ", "Announcements", "Reviews"];
+const tabs = ["Overview", "Exam", "Reviews"];
 
-export default function Overview() {
+interface OverviewProps {
+  currentLessonId: string;
+  onLessonComplete: () => void;
+}
+
+export default function Overview({
+  currentLessonId,
+  onLessonComplete,
+}: OverviewProps) {
+  const { courseId } = useParams<{ courseId: string }>();
+  const [courses, refresh, isLoading] = useAction(
+    courseDetail,
+    [true, () => {}],
+    courseId
+  );
   const [activeTab, setActiveTab] = useState("Overview");
+  const [currentLesson, setCurrentLesson] = useState<
+    | {
+        id: string;
+        question: {
+          id: string;
+          question: string;
+          questionOptions: { id: string; option: string }[];
+          questionAnswer: { answerId: string }[];
+        }[];
+        title: string;
+        videoUrl: string;
+        order: number;
+      }
+    | null
+    | undefined
+  >(null);
+
+  useEffect(() => {
+    if (courses?.lessons) {
+      const lesson = courses.lessons.find(
+        (lesson) => lesson.id === currentLessonId
+      );
+      setCurrentLesson(lesson);
+    }
+  }, [currentLessonId, courses]);
+
+  const handleExamComplete = () => {
+    onLessonComplete();
+    setActiveTab("Overview"); // Switch back to overview after exam
+  };
+
+  if (isLoading) {
+    return <div className="p-6">Loading course details...</div>;
+  }
+
+  if (!courses) {
+    return <div className="p-6">Course not found</div>;
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -69,6 +125,25 @@ export default function Overview() {
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* Exam Section */}
+      {activeTab === "Exam" && currentLesson && (
+        <div className="p-6 max-w-2xl mx-auto">
+          <Exam
+            lessonId={currentLesson.id}
+            questions={currentLesson.question.map((q) => ({
+              id: q.id,
+              question: q.question,
+              options: q.questionOptions.map((opt) => ({
+                id: opt.id,
+                option: opt.option,
+              })),
+              answer: q.questionAnswer[0]?.answerId ?? "",
+            }))}
+            onComplete={handleExamComplete}
+          />
+        </div>
       )}
     </div>
   );
