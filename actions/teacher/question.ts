@@ -3,8 +3,9 @@ import { prisma } from "@/lib/db";
 import { isAuthorized } from "@/lib/isAuthorized";
 import { TQuestion } from "@/lib/zodSchema";
 
+// Create a question for a lesson
 export async function createQuestion(
-  quizId: string,
+  lessonId: string,
   { question, options, answers }: TQuestion
 ) {
   const teacherId = await isAuthorized("teacher");
@@ -12,30 +13,26 @@ export async function createQuestion(
     throw new Error("Unauthorized");
   }
 
-  // Ensure the quiz belongs to the teacher
-  const quiz = await prisma.quiz.findUnique({
-    where: { id: quizId },
+  // Ensure the lesson belongs to the teacher
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
     select: {
-      lesson: {
-        select: {
-          course: {
-            select: { teacherId: true },
-          },
-        },
+      course: {
+        select: { teacherId: true },
       },
     },
   });
 
-  if (!quiz || quiz.lesson.course.teacherId !== teacherId) {
+  if (!lesson || lesson.course.teacherId !== teacherId) {
     throw new Error(
-      "Unauthorized: You can only add questions to your own quiz"
+      "Unauthorized: You can only add questions to your own lesson"
     );
   }
 
   // 1. Create the question and its options
   const newQuestion = await prisma.question.create({
     data: {
-      quizId,
+      lessonId,
       question,
       questionOptions: {
         createMany: {
@@ -67,38 +64,35 @@ export async function createQuestion(
   return newQuestion;
 }
 
-export async function getQuestions(quizId: string) {
+// Get all questions for a lesson
+export async function getQuestions(lessonId: string) {
   const teacherId = await isAuthorized("teacher");
   if (!teacherId) {
     throw new Error("Unauthorized");
   }
 
   try {
-    // check if quiz belongs to teacher
-    const quiz = await prisma.quiz.findUnique({
-      where: { id: quizId },
+    // check if lesson belongs to teacher
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
       select: {
-        lesson: {
-          select: {
-            course: {
-              select: { teacherId: true },
-            },
-          },
+        course: {
+          select: { teacherId: true },
         },
       },
     });
-    if (!quiz || quiz.lesson.course.teacherId !== teacherId) {
+    if (!lesson || lesson.course.teacherId !== teacherId) {
       throw new Error(
-        "Unauthorized: You can only get questions from your own quiz"
+        "Unauthorized: You can only get questions from your own lesson"
       );
     }
 
     // get questions
     const questions = await prisma.question.findMany({
-      where: { quizId },
+      where: { lessonId },
       select: {
         id: true,
-        quizId: true,
+        lessonId: true,
         question: true,
         questionOptions: { select: { id: true, option: true } },
         questionAnswer: { select: { answerId: true } },
@@ -111,6 +105,7 @@ export async function getQuestions(quizId: string) {
   }
 }
 
+// Delete a question (only if the lesson belongs to the teacher)
 export async function deleteQuestion(id: string) {
   const teacherId = await isAuthorized("teacher");
   if (!teacherId) {
@@ -121,22 +116,18 @@ export async function deleteQuestion(id: string) {
     const question = await prisma.question.findUnique({
       where: { id },
       select: {
-        quiz: {
+        lesson: {
           select: {
-            lesson: {
-              select: {
-                course: {
-                  select: { teacherId: true },
-                },
-              },
+            course: {
+              select: { teacherId: true },
             },
           },
         },
       },
     });
-    if (!question || question.quiz.lesson.course.teacherId !== teacherId) {
+    if (!question || question.lesson.course.teacherId !== teacherId) {
       throw new Error(
-        "Unauthorized: You can only delete questions from your own quiz"
+        "Unauthorized: You can only delete questions from your own lesson"
       );
     }
 

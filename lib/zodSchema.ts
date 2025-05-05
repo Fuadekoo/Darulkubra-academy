@@ -21,11 +21,6 @@ export const lessonSchema = z.object({
 });
 export type Lesson = z.infer<typeof lessonSchema>;
 
-export const quizSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-});
-export type Quiz = z.infer<typeof quizSchema>;
-
 // question
 export const questionSchema = z.object({
   id: z.string({}).optional(),
