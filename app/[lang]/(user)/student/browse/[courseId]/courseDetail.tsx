@@ -2,30 +2,105 @@
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Exam from "./exam";
-import { ArrowLeft, List } from "lucide-react";
+import { ArrowLeft, List, CheckCircle } from "lucide-react";
+import Overview from "./overview";
 
-const course = {
-  title: "Figma from A to Z",
-  author: { name: "Crystal Lucas", role: "UI/UX Specialist", rating: 4.8 },
-  rating: 4.5,
-  reviews: 126,
-  totalLessons: 38,
-  duration: "4h 30min",
-  videoUrl: "https://www.youtube.com/embed/YOUR_VIDEO_ID",
-  sections: [
-    { title: "Intro", duration: "22 min" },
-    { title: "Intermediate Level Stuff", duration: "1h 20min" },
-    { title: "Advanced Stuff", duration: "36 min" },
-    { title: "Imports & Graphics", duration: "40 min" },
-    { title: "Components in Figma", duration: "1h 12min" },
-    { title: "Styles in Figma", duration: "41 min" },
-    { title: "Summary", duration: "8 min" },
+// Sample data matching your Prisma schema
+const sampleCourse = {
+  id: "course1",
+  title: "Introduction to Web Development",
+  description: "Learn the fundamentals of web development from scratch",
+  teacher: {
+    id: "teacher1",
+    name: "Alex Johnson",
+    phoneno: "+1234567890",
+    passcode: "hashedpass",
+    isActive: true,
+  },
+  lessons: [
+    {
+      id: "lesson1",
+      title: "HTML Basics",
+      videoUrl: "https://www.youtube.com/embed/pQN-pnXPaVg",
+      order: 1,
+      questions: [
+        {
+          id: "q1",
+          question: "What does HTML stand for?",
+          questionOptions: [
+            { id: "opt1", option: "Hyper Text Markup Language" },
+            { id: "opt2", option: "Home Tool Markup Language" },
+            { id: "opt3", option: "Hyperlinks and Text Markup Language" },
+          ],
+          questionAnswer: [{ answerId: "opt1" }],
+        },
+      ],
+    },
+    {
+      id: "lesson2",
+      title: "CSS Fundamentals",
+      videoUrl: "https://www.youtube.com/embed/1Rs2ND1ryYc",
+      order: 2,
+      questions: [
+        {
+          id: "q2",
+          question: "What does CSS stand for?",
+          questionOptions: [
+            { id: "opt4", option: "Computer Style Sheets" },
+            { id: "opt5", option: "Creative Style Sheets" },
+            { id: "opt6", option: "Cascading Style Sheets" },
+          ],
+          questionAnswer: [{ answerId: "opt6" }],
+        },
+      ],
+    },
+    {
+      id: "lesson3",
+      title: "JavaScript Introduction",
+      videoUrl: "https://www.youtube.com/embed/W6NZfCO5SIk",
+      order: 3,
+      questions: [
+        {
+          id: "q3",
+          question: "Which type of language is JavaScript?",
+          questionOptions: [
+            { id: "opt7", option: "Compiled" },
+            { id: "opt8", option: "Interpreted" },
+            { id: "opt9", option: "Assembly" },
+          ],
+          questionAnswer: [{ answerId: "opt8" }],
+        },
+      ],
+    },
   ],
+  createdAt: new Date(),
 };
 
 export default function CourseDetail() {
+  const [currentLesson, setCurrentLesson] = useState<number>(0);
   const [showExam, setShowExam] = useState(false);
   const [showSections, setShowSections] = useState(false);
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(
+    new Set()
+  );
+
+  const handleCompleteLesson = () => {
+    if (sampleCourse.lessons[currentLesson]) {
+      setCompletedLessons((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(sampleCourse.lessons[currentLesson].id);
+        return newSet;
+      });
+      setShowExam(true);
+    }
+  };
+
+  const handleExamComplete = () => {
+    setShowExam(false);
+    if (currentLesson < sampleCourse.lessons.length - 1) {
+      setCurrentLesson(currentLesson + 1);
+    }
+  };
 
   if (showExam) {
     return (
@@ -35,22 +110,27 @@ export default function CourseDetail() {
           onClick={() => setShowExam(false)}
         >
           <ArrowLeft className="w-5 h-5" />
-          Back to Course
+          Back to Lesson
         </button>
-        <Exam />
+        <Exam
+          lessonId={sampleCourse.lessons[currentLesson].id}
+          questions={sampleCourse.lessons[currentLesson].questions}
+          onComplete={handleExamComplete}
+        />
       </div>
     );
   }
+
+  const currentLessonData = sampleCourse.lessons[currentLesson];
 
   return (
     <div className="p-6 max-w-4xl mx-auto relative">
       {/* Course Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{course.title}</h1>
+        <h1 className="text-3xl font-bold">{sampleCourse.title}</h1>
         <div className="flex gap-3">
-          <button className="border px-4 py-2 rounded-lg">Share</button>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-            Enroll Now
+          <button className="border px-4 py-2 rounded-lg hover:bg-gray-100">
+            Share
           </button>
         </div>
       </div>
@@ -61,19 +141,11 @@ export default function CourseDetail() {
           <CardTitle>Course Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>
-            Unlock the power of Figma with this comprehensive online course.
-          </p>
+          <p>{sampleCourse.description}</p>
           <p className="mt-2">
-            💡 <strong>Instructor:</strong> {course.author.name} (
-            {course.author.role})
+            💡 <strong>Instructor:</strong> {sampleCourse.teacher.name}
           </p>
-          <p>
-            ⭐ {course.rating} ({course.reviews} reviews)
-          </p>
-          <p>
-            📚 {course.totalLessons} lessons | ⏳ {course.duration}
-          </p>
+          <p>📚 {sampleCourse.lessons.length} lessons</p>
         </CardContent>
       </Card>
 
@@ -89,45 +161,83 @@ export default function CourseDetail() {
               {showSections ? "Hide Sections" : "Show Sections"}
             </button>
           </div>
-          <iframe
-            className="w-full h-96 rounded-lg"
-            src={course.videoUrl}
-            title={course.title}
-            allowFullScreen
-          />
-          <button
-            className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
-            onClick={() => setShowExam(true)}
-          >
-            Complete
-          </button>
+
+          {currentLessonData && (
+            <>
+              <h2 className="text-xl font-bold mb-2">
+                {currentLessonData.title}
+              </h2>
+              <div className="aspect-video w-full">
+                <iframe
+                  className="w-full h-full rounded-lg"
+                  src={currentLessonData.videoUrl}
+                  title={currentLessonData.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <button
+                className={`mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-lg transition ${
+                  completedLessons.has(currentLessonData.id)
+                    ? "bg-green-600 text-white"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+                onClick={handleCompleteLesson}
+                disabled={completedLessons.has(currentLessonData.id)}
+              >
+                {completedLessons.has(currentLessonData.id) ? (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Lesson Completed
+                  </>
+                ) : (
+                  "Complete Lesson"
+                )}
+              </button>
+              <Overview />
+            </>
+          )}
         </div>
 
         {/* Sections Sidebar */}
-        <div
-          className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg border-l border-gray-200 z-50 transform transition-transform duration-300 ${
-            showSections ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <div className="flex justify-between items-center p-4 border-b">
-            <h2 className="text-lg font-bold">Course Sections</h2>
-            <button
-              className="text-gray-500 hover:text-gray-800"
-              onClick={() => setShowSections(false)}
-            >
-              ✕
-            </button>
+        {showSections && (
+          <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg border-l border-gray-200 z-50">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-bold">Course Lessons</h2>
+              <button
+                className="text-gray-500 hover:text-gray-800"
+                onClick={() => setShowSections(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto max-h-[calc(100vh-60px)]">
+              <ul className="space-y-2">
+                {sampleCourse.lessons.map((lesson, index) => (
+                  <li
+                    key={lesson.id}
+                    className={`pb-2 cursor-pointer ${
+                      index === currentLesson ? "font-bold text-blue-600" : ""
+                    }`}
+                    onClick={() => {
+                      setCurrentLesson(index);
+                      setShowSections(false);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>
+                        {index + 1}. {lesson.title}
+                      </span>
+                      {completedLessons.has(lesson.id) && (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="p-4">
-            <ul className="space-y-3">
-              {course.sections.map((section, index) => (
-                <li key={index} className="border-b pb-2">
-                  <strong>{section.title}</strong> - {section.duration}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
