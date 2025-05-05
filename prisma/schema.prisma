@@ -61,30 +61,22 @@ model Lesson {
   videoUrl  String
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId  String
-  quiz      Quiz?
+  // quiz      Quiz?
+  question   Question[]
   order     Int
   StudentProgress StudentProgress[]
   createdAt DateTime @default(now())
 }
 
-// QUIZ STRUCTURE
-model Quiz {
-  id        String     @id @default(cuid())
-  title     String
-  lesson    Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  lessonId  String     @unique
-  questions Question[]
-  StudentQuiz StudentQuiz[]
-}
 
 model Question {
   id             String           @id @default(cuid())
-  quiz           Quiz             @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  quizId         String
+  lesson         Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId       String
   question       String
   questionOptions QuestionOption[]
   questionAnswer QuestionAnswer[]
-  StudentQuizAnswer StudentQuizAnswer[]
+  StudentQuiz StudentQuiz[]
 }
 
 model QuestionOption {
@@ -109,28 +101,22 @@ model StudentQuiz {
   id         String        @id @default(cuid())
   student    Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId  String
-  quiz       Quiz          @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  quizId     String
-  score      Float?
-  passed     Boolean       @default(false)
+  question   Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
   takenAt    DateTime      @default(now())
-
   studentQuizAnswers StudentQuizAnswer[]
 
-  @@unique([studentId, quizId])
+  @@unique([studentId, questionId])
 }
 
 model StudentQuizAnswer {
   id             String         @id @default(cuid())
   studentQuiz    StudentQuiz    @relation(fields: [studentQuizId], references: [id], onDelete: Cascade)
   studentQuizId  String
-  question       Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId     String
-
   selectedOption QuestionOption @relation(fields: [optionId], references: [id])
   optionId       String         @map("questionOptionId")
 
-  @@unique([studentQuizId, questionId])
+  @@unique([studentQuizId, optionId])
 }
 
 // TRACK STUDENT LESSON PROGRESS

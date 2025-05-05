@@ -63,19 +63,9 @@ CREATE TABLE `Lesson` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Quiz` (
-    `id` VARCHAR(191) NOT NULL,
-    `title` VARCHAR(191) NOT NULL,
-    `lessonId` VARCHAR(191) NOT NULL,
-
-    UNIQUE INDEX `Quiz_lessonId_key`(`lessonId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `Question` (
     `id` VARCHAR(191) NOT NULL,
-    `quizId` VARCHAR(191) NOT NULL,
+    `lessonId` VARCHAR(191) NOT NULL,
     `question` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -103,12 +93,10 @@ CREATE TABLE `QuestionAnswer` (
 CREATE TABLE `StudentQuiz` (
     `id` VARCHAR(191) NOT NULL,
     `studentId` VARCHAR(191) NOT NULL,
-    `quizId` VARCHAR(191) NOT NULL,
-    `score` DOUBLE NULL,
-    `passed` BOOLEAN NOT NULL DEFAULT false,
+    `questionId` VARCHAR(191) NOT NULL,
     `takenAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `StudentQuiz_studentId_quizId_key`(`studentId`, `quizId`),
+    UNIQUE INDEX `StudentQuiz_studentId_questionId_key`(`studentId`, `questionId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -116,10 +104,9 @@ CREATE TABLE `StudentQuiz` (
 CREATE TABLE `StudentQuizAnswer` (
     `id` VARCHAR(191) NOT NULL,
     `studentQuizId` VARCHAR(191) NOT NULL,
-    `questionId` VARCHAR(191) NOT NULL,
     `questionOptionId` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `StudentQuizAnswer_studentQuizId_questionId_key`(`studentQuizId`, `questionId`),
+    UNIQUE INDEX `StudentQuizAnswer_studentQuizId_questionOptionId_key`(`studentQuizId`, `questionOptionId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -142,10 +129,7 @@ ALTER TABLE `Course` ADD CONSTRAINT `Course_teacherId_fkey` FOREIGN KEY (`teache
 ALTER TABLE `Lesson` ADD CONSTRAINT `Lesson_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `Course`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Quiz` ADD CONSTRAINT `Quiz_lessonId_fkey` FOREIGN KEY (`lessonId`) REFERENCES `Lesson`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `Question` ADD CONSTRAINT `Question_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `Quiz`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Question` ADD CONSTRAINT `Question_lessonId_fkey` FOREIGN KEY (`lessonId`) REFERENCES `Lesson`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `QuestionOption` ADD CONSTRAINT `QuestionOption_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -160,13 +144,10 @@ ALTER TABLE `QuestionAnswer` ADD CONSTRAINT `QuestionAnswer_questionOptionId_fke
 ALTER TABLE `StudentQuiz` ADD CONSTRAINT `StudentQuiz_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `Student`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `StudentQuiz` ADD CONSTRAINT `StudentQuiz_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `Quiz`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `StudentQuiz` ADD CONSTRAINT `StudentQuiz_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `StudentQuizAnswer` ADD CONSTRAINT `StudentQuizAnswer_studentQuizId_fkey` FOREIGN KEY (`studentQuizId`) REFERENCES `StudentQuiz`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `StudentQuizAnswer` ADD CONSTRAINT `StudentQuizAnswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `StudentQuizAnswer` ADD CONSTRAINT `StudentQuizAnswer_questionOptionId_fkey` FOREIGN KEY (`questionOptionId`) REFERENCES `QuestionOption`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
