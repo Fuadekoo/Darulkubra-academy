@@ -1,7 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import useAction from "@/hooks/useAction";
-import { submitAnswers ,checkAnswerSubmitted,correctAnswer} from "@/actions/student/question";
+import {
+  submitAnswers,
+  checkAnswerSubmitted,
+  correctAnswer,
+} from "@/actions/student/question";
 
 interface Question {
   id: string;
@@ -25,14 +29,11 @@ function Exam({ lessonId, questions, onComplete }: ExamProps) {
     questionId,
     answerId,
   }));
-  const [submit, refresh, isLoading] = useAction(
-    submitAnswers,
-    [, () => {}],
-    answers
-  );
-  const [checksubmit,refreshCheck, isLoadingCheck] = useAction(
-    
-  console.log("submit", submit);
+  const [, submit, isLoading] = useAction(submitAnswers, [, () => {}]);
+  // const [checksubmit,refreshCheck, isLoadingCheck] = useAction(
+
+  console.log("answer", answers);
+  // submit(answers);
 
   const handleChange = (questionId: string, answerId: string) => {
     setSelected((prev) => ({ ...prev, [questionId]: answerId }));
@@ -62,7 +63,7 @@ function Exam({ lessonId, questions, onComplete }: ExamProps) {
           ))}
         </div>
       ))}
-      <button onPress={submit} disabled={isLoading}>
+      <button onClick={() => submit(answers)} disabled={isLoading}>
         {isLoading ? "Submitting..." : "Complete Exam"}
       </button>
     </div>
