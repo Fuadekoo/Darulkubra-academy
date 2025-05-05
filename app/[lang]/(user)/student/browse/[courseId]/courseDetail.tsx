@@ -1,83 +1,21 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Exam from "./exam";
 import { ArrowLeft, List, CheckCircle } from "lucide-react";
 import Overview from "./overview";
-
-// Sample data matching your Prisma schema
-const sampleCourse = {
-  id: "course1",
-  title: "Introduction to Web Development",
-  description: "Learn the fundamentals of web development from scratch",
-  teacher: {
-    id: "teacher1",
-    name: "Alex Johnson",
-    phoneno: "+1234567890",
-    passcode: "hashedpass",
-    isActive: true,
-  },
-  lessons: [
-    {
-      id: "lesson1",
-      title: "HTML Basics",
-      videoUrl: "https://www.youtube.com/embed/pQN-pnXPaVg",
-      order: 1,
-      questions: [
-        {
-          id: "q1",
-          question: "What does HTML stand for?",
-          questionOptions: [
-            { id: "opt1", option: "Hyper Text Markup Language" },
-            { id: "opt2", option: "Home Tool Markup Language" },
-            { id: "opt3", option: "Hyperlinks and Text Markup Language" },
-          ],
-          questionAnswer: [{ answerId: "opt1" }],
-        },
-      ],
-    },
-    {
-      id: "lesson2",
-      title: "CSS Fundamentals",
-      videoUrl: "https://www.youtube.com/embed/1Rs2ND1ryYc",
-      order: 2,
-      questions: [
-        {
-          id: "q2",
-          question: "What does CSS stand for?",
-          questionOptions: [
-            { id: "opt4", option: "Computer Style Sheets" },
-            { id: "opt5", option: "Creative Style Sheets" },
-            { id: "opt6", option: "Cascading Style Sheets" },
-          ],
-          questionAnswer: [{ answerId: "opt6" }],
-        },
-      ],
-    },
-    {
-      id: "lesson3",
-      title: "JavaScript Introduction",
-      videoUrl: "https://www.youtube.com/embed/W6NZfCO5SIk",
-      order: 3,
-      questions: [
-        {
-          id: "q3",
-          question: "Which type of language is JavaScript?",
-          questionOptions: [
-            { id: "opt7", option: "Compiled" },
-            { id: "opt8", option: "Interpreted" },
-            { id: "opt9", option: "Assembly" },
-          ],
-          questionAnswer: [{ answerId: "opt8" }],
-        },
-      ],
-    },
-  ],
-  createdAt: new Date(),
-};
+import useAction from "@/hooks/useAction";
+import { courseDetail } from "@/actions/student/course";
+import { useParams } from "next/navigation";
 
 export default function CourseDetail() {
-  const [currentLesson, setCurrentLesson] = useState<number>(0);
+  const { courseId } = useParams<{ courseId: string }>();
+  const [courses, refresh, isLoading] = useAction(
+    courseDetail,
+    [true, () => {}],
+    courseId
+  );
+  const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [showExam, setShowExam] = useState(false);
   const [showSections, setShowSections] = useState(false);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(
@@ -85,10 +23,10 @@ export default function CourseDetail() {
   );
 
   const handleCompleteLesson = () => {
-    if (sampleCourse.lessons[currentLesson]) {
+    if (courses?.lessons?.[currentLessonIndex]) {
       setCompletedLessons((prev) => {
         const newSet = new Set(prev);
-        newSet.add(sampleCourse.lessons[currentLesson].id);
+        newSet.add(courses.lessons[currentLessonIndex].id);
         return newSet;
       });
       setShowExam(true);
@@ -97,12 +35,21 @@ export default function CourseDetail() {
 
   const handleExamComplete = () => {
     setShowExam(false);
-    if (currentLesson < sampleCourse.lessons.length - 1) {
-      setCurrentLesson(currentLesson + 1);
+    if (courses?.lessons && currentLessonIndex < courses.lessons.length - 1) {
+      setCurrentLessonIndex(currentLessonIndex + 1);
     }
   };
 
-  if (showExam) {
+  if (isLoading) {
+    return <div className="p-6">Loading course details...</div>;
+  }
+
+  if (!courses) {
+    return <div className="p-6">Course not found</div>;
+  }
+
+  if (showExam && courses?.lessons?.[currentLessonIndex]) {
+    const currentLesson = courses.lessons[currentLessonIndex];
     return (
       <div className="p-6 max-w-2xl mx-auto">
         <button
@@ -113,10 +60,11 @@ export default function CourseDetail() {
           Back to Lesson
         </button>
         <Exam
-          lessonId={sampleCourse.lessons[currentLesson].id}
-          questions={sampleCourse.lessons[currentLesson].questions.map((q) => ({
+          lessonId={currentLesson.id}
+          questions={currentLesson.question.map((q) => ({
+            id: q.id,
             question: q.question,
-            options: q.questionOptions.map((opt) => opt.option),
+            options: q.questionOptions.map((opt) => ({ id: opt.id, option: opt.option })),
             answer: q.questionAnswer[0]?.answerId ?? "",
           }))}
           onComplete={handleExamComplete}
@@ -125,13 +73,13 @@ export default function CourseDetail() {
     );
   }
 
-  const currentLessonData = sampleCourse.lessons[currentLesson];
+  const currentLesson = courses.lessons?.[currentLessonIndex];
 
   return (
     <div className="p-6 max-w-4xl mx-auto relative">
       {/* Course Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{sampleCourse.title}</h1>
+        <h1 className="text-3xl font-bold">{courses.title}</h1>
         <div className="flex gap-3">
           <button className="border px-4 py-2 rounded-lg hover:bg-gray-100">
             Share
@@ -145,11 +93,11 @@ export default function CourseDetail() {
           <CardTitle>Course Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>{sampleCourse.description}</p>
+          <p>{courses.description}</p>
           <p className="mt-2">
-            💡 <strong>Instructor:</strong> {sampleCourse.teacher.name}
+            💡 <strong>Instructor:</strong> {courses.teacher.name}
           </p>
-          <p>📚 {sampleCourse.lessons.length} lessons</p>
+          <p>📚 {courses.lessons?.length || 0} lessons</p>
         </CardContent>
       </Card>
 
@@ -166,30 +114,28 @@ export default function CourseDetail() {
             </button>
           </div>
 
-          {currentLessonData && (
+          {currentLesson && (
             <>
-              <h2 className="text-xl font-bold mb-2">
-                {currentLessonData.title}
-              </h2>
+              <h2 className="text-xl font-bold mb-2">{currentLesson.title}</h2>
               <div className="aspect-video w-full">
                 <iframe
                   className="w-full h-full rounded-lg"
-                  src={currentLessonData.videoUrl}
-                  title={currentLessonData.title}
+                  src={currentLesson.videoUrl}
+                  title={currentLesson.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
               </div>
               <button
                 className={`mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-lg transition ${
-                  completedLessons.has(currentLessonData.id)
+                  completedLessons.has(currentLesson.id)
                     ? "bg-green-600 text-white"
                     : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
                 onClick={handleCompleteLesson}
-                disabled={completedLessons.has(currentLessonData.id)}
+                disabled={completedLessons.has(currentLesson.id)}
               >
-                {completedLessons.has(currentLessonData.id) ? (
+                {completedLessons.has(currentLesson.id) ? (
                   <>
                     <CheckCircle className="w-5 h-5" />
                     Lesson Completed
@@ -217,14 +163,16 @@ export default function CourseDetail() {
             </div>
             <div className="p-4 overflow-y-auto max-h-[calc(100vh-60px)]">
               <ul className="space-y-2">
-                {sampleCourse.lessons.map((lesson, index) => (
+                {courses.lessons?.map((lesson, index) => (
                   <li
                     key={lesson.id}
                     className={`pb-2 cursor-pointer ${
-                      index === currentLesson ? "font-bold text-blue-600" : ""
+                      index === currentLessonIndex
+                        ? "font-bold text-blue-600"
+                        : ""
                     }`}
                     onClick={() => {
-                      setCurrentLesson(index);
+                      setCurrentLessonIndex(index);
                       setShowSections(false);
                     }}
                   >
