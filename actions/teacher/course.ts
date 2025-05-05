@@ -2,22 +2,22 @@
 // import { Course } from "@/lib/zodSchema";
 import { prisma } from "@/lib/db";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { Lesson } from "@/lib/zodSchema";
+import { Course } from "@/lib/zodSchema";
 
-export async function createLesson(data: Lesson) {
+export async function createCourses(data: Course) {
   const teacher = await isAuthorized("teacher");
   if (!teacher) {
     throw new Error("Unauthorized: Teacher ID is undefined");
   }
   try {
-    const lesson = await prisma.lesson.create({
+    const lesson = await prisma.course.create({
       data: {
-        title: data.title,
-        videoUrl: data.videoUrl,
-        order: data.order,
-        courseId: data.courseId,
-      },
-    });
+        title:data.title,
+        description:data.description,
+        teacherId:teacher,
+    }
+
+  );
     return lesson;
   } catch (error) {
     console.error("Error creating lesson:", error);
@@ -25,21 +25,21 @@ export async function createLesson(data: Lesson) {
   }
 }
 
-export async function updateLesson(data: Lesson, lessonId: string) {
+export async function updateCourse(data: Course, courseId: string) {
   const teacher = await isAuthorized("teacher");
   if (!teacher) {
     throw new Error("Unauthorized: Teacher ID is undefined");
   }
   try {
-    const existingLesson = await prisma.lesson.findUnique({
-      where: { id: lessonId },
-      select: { courseId: true },
+    const existingCourse = await prisma.course.findUnique({
+      where: { id: courseId },
+      // select: { courseId: true },
     });
-    if (!existingLesson) {
+    if (!existingCourse) {
       throw new Error("Lesson not found");
     }
     const course = await prisma.course.findUnique({
-      where: { id: existingLesson.courseId },
+      where: { id: existingCourse.id  ,teacherId: teacher},
       select: { teacherId: true },
     });
     if (!course) {
@@ -48,13 +48,12 @@ export async function updateLesson(data: Lesson, lessonId: string) {
     if (course.teacherId !== teacher) {
       throw new Error("Unauthorized: You can only update your own lesson");
     }
-    const lesson = await prisma.lesson.update({
-      where: { id: lessonId },
+    const lesson = await prisma.course.update({
+      where: { id: courseId },
       data: {
         title: data.title,
-        videoUrl: data.videoUrl,
-        order: data.order,
-        courseId: data.courseId,
+        description:data.description,
+        teacher:teacher
       },
     });
     return lesson;
@@ -64,21 +63,21 @@ export async function updateLesson(data: Lesson, lessonId: string) {
   }
 }
 
-export async function deleteLesson(lessonId: string) {
+export async function deleteCourse(lessonId: string) {
   const teacher = await isAuthorized("teacher");
   if (!teacher) {
     throw new Error("Unauthorized: Teacher ID is undefined");
   }
   try {
-    const existingLesson = await prisma.lesson.findUnique({
+    const existingLesson = await prisma.course.findUnique({
       where: { id: lessonId },
-      select: { courseId: true },
+      // select: { courseId: true },
     });
     if (!existingLesson) {
       throw new Error("Lesson not found");
     }
     const course = await prisma.course.findUnique({
-      where: { id: existingLesson.courseId },
+      where: { id: existingLesson.description },
       select: { teacherId: true },
     });
     if (!course) {
