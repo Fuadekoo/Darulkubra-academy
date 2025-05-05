@@ -1,4 +1,8 @@
+"use client";
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import Exam from "./exam";
+import { ArrowLeft, List } from "lucide-react";
 
 const course = {
   title: "Figma from A to Z",
@@ -20,8 +24,26 @@ const course = {
 };
 
 export default function CourseDetail() {
+  const [showExam, setShowExam] = useState(false);
+  const [showSections, setShowSections] = useState(false);
+
+  if (showExam) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto">
+        <button
+          className="flex items-center gap-2 mb-4 text-blue-600 hover:underline"
+          onClick={() => setShowExam(false)}
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Course
+        </button>
+        <Exam />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto relative">
       {/* Course Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{course.title}</h1>
@@ -55,23 +77,48 @@ export default function CourseDetail() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* Embedded YouTube Video */}
-        <div className="mb-6">
+      <div className="relative flex gap-6">
+        {/* Main Video Area */}
+        <div className="flex-1 mb-6 flex flex-col">
+          <div className="flex items-center justify-between mb-2">
+            <button
+              className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded"
+              onClick={() => setShowSections((prev) => !prev)}
+            >
+              <List className="w-5 h-5" />
+              {showSections ? "Hide Sections" : "Show Sections"}
+            </button>
+          </div>
           <iframe
             className="w-full h-96 rounded-lg"
             src={course.videoUrl}
             title={course.title}
             allowFullScreen
           />
+          <button
+            className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+            onClick={() => setShowExam(true)}
+          >
+            Complete
+          </button>
         </div>
 
-        {/* Course Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Course Content</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Sections Sidebar */}
+        <div
+          className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg border-l border-gray-200 z-50 transform transition-transform duration-300 ${
+            showSections ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-lg font-bold">Course Sections</h2>
+            <button
+              className="text-gray-500 hover:text-gray-800"
+              onClick={() => setShowSections(false)}
+            >
+              ✕
+            </button>
+          </div>
+          <div className="p-4">
             <ul className="space-y-3">
               {course.sections.map((section, index) => (
                 <li key={index} className="border-b pb-2">
@@ -79,8 +126,8 @@ export default function CourseDetail() {
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
