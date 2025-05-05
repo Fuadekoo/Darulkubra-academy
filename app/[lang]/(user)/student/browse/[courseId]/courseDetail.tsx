@@ -114,7 +114,11 @@ export default function CourseDetail() {
         </button>
         <Exam
           lessonId={sampleCourse.lessons[currentLesson].id}
-          questions={sampleCourse.lessons[currentLesson].questions}
+          questions={sampleCourse.lessons[currentLesson].questions.map((q) => ({
+            question: q.question,
+            options: q.questionOptions.map((opt) => opt.option),
+            answer: q.questionAnswer[0]?.answerId ?? "",
+          }))}
           onComplete={handleExamComplete}
         />
       </div>
