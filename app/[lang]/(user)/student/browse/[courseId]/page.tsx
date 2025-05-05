@@ -5,9 +5,8 @@ function Page() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Course Detail</h1>
-      <p>Course detail page</p>
+      {/* <p>Course detail page</p> */}
       <CourseDetail />
-      
     </div>
   );
 }
