@@ -67,7 +67,7 @@ export default function Overview({
   }, [currentLessonId, courses]);
 
   const handleExamComplete = () => {
-    onLessonComplete();
+    // onLessonComplete();
     setActiveTab("Overview"); // Switch back to overview after exam
   };
 

@@ -1,4 +1,3 @@
-"use client";
 import React, { useState, useEffect } from "react";
 import useAction from "@/hooks/useAction";
 import {
@@ -40,7 +39,6 @@ function Exam({ lessonId, questions, onComplete }: ExamProps) {
 
   useEffect(() => {
     if (checksubmit) {
-      // If already submitted, fetch the result
       correctAnswer(lessonId).then(setResult);
     }
   }, [checksubmit, lessonId]);
@@ -51,8 +49,9 @@ function Exam({ lessonId, questions, onComplete }: ExamProps) {
 
   const handleSubmit = async () => {
     await submit(answers);
-    refreshCheck(); // Refresh to trigger result display
-    if (onComplete) onComplete();
+    await refreshCheck(); // Wait for refreshCheck to complete
+    // After refresh, checksubmit will be true and useEffect will fetch result
+    // if (onComplete) onComplete();
   };
 
   if (isLoadingCheck) return <div>Loading...</div>;
@@ -83,14 +82,11 @@ function Exam({ lessonId, questions, onComplete }: ExamProps) {
                   let color = "";
                   if (isCorrect && isStudent)
                     color = "bg-green-200 text-green-800 font-bold";
-                  // correct and chosen
                   else if (isCorrect && !isStudent)
                     color = "bg-green-100 text-green-600";
-                  // correct but not chosen
                   else if (!isCorrect && isStudent)
                     color = "bg-red-200 text-red-800 font-bold";
-                  // wrong and chosen
-                  else color = ""; // not chosen, not correct
+                  else color = "";
                   return (
                     <div
                       key={opt.id}
@@ -134,12 +130,13 @@ function Exam({ lessonId, questions, onComplete }: ExamProps) {
         </div>
       ))}
       <button
+        className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
         onClick={handleSubmit}
         disabled={
           isLoading || Object.keys(selected).length !== questions.length
         }
       >
-        {isLoading ? "Submitting..." : "Complete Exam"}
+        {isLoading ? "Submitting..." : "Submit"}
       </button>
     </div>
   );
