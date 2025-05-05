@@ -146,11 +146,12 @@ function Header({
       >
         ☰
       </button>
-      <h1 className="text-xl font-bold">Figma from A to Z</h1>
+      {/* <h1 className="text-xl font-bold">Figma from A to Z</h1>
       <div className="flex gap-3">
         <Button variant="outline">Share</Button>
         <Button className="bg-blue-500 text-white">Enroll Now</Button>
-      </div>
+      </div> */}
+      <LightDarkToggle />
     </header>
   );
 }
