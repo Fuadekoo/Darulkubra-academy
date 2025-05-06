@@ -9,7 +9,7 @@ export const loginSchema = z.object({
 export const courseSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  teacherId: z.string().min(1, "Teacher ID is required"),
+  // teacherId: z.string().min(1, "Teacher ID is required"),
 });
 export type Course = z.infer<typeof courseSchema>;
 

@@ -15,8 +15,7 @@ export async function createCourses(data: Course) {
         title:data.title,
         description:data.description,
         teacherId:teacher,
-    }
-
+    }}
   );
     return lesson;
   } catch (error) {
@@ -53,7 +52,7 @@ export async function updateCourse(data: Course, courseId: string) {
       data: {
         title: data.title,
         description:data.description,
-        teacher:teacher
+        teacherId:teacher
       },
     });
     return lesson;
@@ -63,14 +62,14 @@ export async function updateCourse(data: Course, courseId: string) {
   }
 }
 
-export async function deleteCourse(lessonId: string) {
+export async function deleteCourse(courseId: string) {
   const teacher = await isAuthorized("teacher");
   if (!teacher) {
     throw new Error("Unauthorized: Teacher ID is undefined");
   }
   try {
     const existingLesson = await prisma.course.findUnique({
-      where: { id: lessonId },
+      where: { id:courseId },
       // select: { courseId: true },
     });
     if (!existingLesson) {
@@ -86,8 +85,8 @@ export async function deleteCourse(lessonId: string) {
     if (course.teacherId !== teacher) {
       throw new Error("Unauthorized: You can only update your own lesson");
     }
-    await prisma.lesson.delete({
-      where: { id: lessonId },
+    await prisma.course.delete({
+      where: { id:existingLesson.id },
     });
     return { success: true };
   } catch (error) {
