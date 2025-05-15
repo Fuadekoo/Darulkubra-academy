@@ -3,7 +3,7 @@ CREATE TABLE `coursePackage` (
     `id` VARCHAR(191) NOT NULL,
     `name` TEXT NOT NULL,
     `description` TEXT NULL,
-    `imageUrl` TEXT NULL,
+    `userType` ENUM('KIDS', 'GENERAL', 'ADULT') NOT NULL DEFAULT 'GENERAL',
     `isPublished` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -21,6 +21,8 @@ CREATE TABLE `course` (
     `isPublished` BOOLEAN NOT NULL DEFAULT false,
     `order` INTEGER NOT NULL,
     `packageId` VARCHAR(191) NULL,
+    `timeLimit` INTEGER NULL,
+    `timeUnit` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 

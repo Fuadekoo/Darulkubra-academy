@@ -19,10 +19,10 @@ function MainMenu({ className }: { className?: string }) {
       </header>
       <ul className="py-4 grow ">
         <MenuItems href="/dashboard">Dashboard</MenuItems>
-        <MenuItems href="/dashboard/teams">Teams</MenuItems>
-        <MenuItems href="/dashboard/employees">employees</MenuItems>
+        <MenuItems href="/dashboard/teams">analysis</MenuItems>
+        {/* <MenuItems href="/dashboard/employees">employees</MenuItems>
         <MenuItems href="/dashboard/account">Account</MenuItems>
-        <MenuItems href="/dashboard/settings">Settings</MenuItems>
+        <MenuItems href="/dashboard/settings">Settings</MenuItems> */}
       </ul>
       <footer className="flex items-center gap-2">
         <Avatar>

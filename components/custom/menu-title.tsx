@@ -1,10 +1,10 @@
 import React from "react";
-import { PersonStandingIcon } from "lucide-react";
+import { BookOpenIcon } from "lucide-react";
 
 function MenuTitle() {
   return (
     <div className=" flex items-center">
-      <PersonStandingIcon className="text-primary" size={40} /> Darulkubra
+      <BookOpenIcon className="text-primary" size={40} /> Darulkubra
     </div>
   );
 }

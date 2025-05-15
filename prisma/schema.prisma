@@ -1,9 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+ 
 generator client {
   provider = "prisma-client-js"
 }
@@ -23,9 +18,7 @@ enum UserType {
 model coursePackage {
   id          String   @id @default(uuid())
   name        String   @db.Text
-  description String?  @db.Text
-  userType   UserType
-  isPublished Boolean  @default(false)
+  userType   UserType  @default(GENERAL)
   courses     course[]
   students    wpos_wpdatatable_23[] @relation("PackageHistory")
   activeStudents wpos_wpdatatable_23[] @relation("ActivePackage")
@@ -60,7 +53,7 @@ model chapter {
   videoUrl    String? @db.Text
   position    Int
   isPublished Boolean @default(false)
-  isFree      Boolean @default(false)
+
 
   questions question[]
 
@@ -141,7 +134,8 @@ model studentProgress {
   studentId   Int
   chapter     chapter             @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   chapterId   String
-  isCompleted Boolean             @default(false)
+  isStarted  Boolean            @default(true)
+  isCompleted Boolean            @default(false)
   completedAt DateTime?
 
   @@unique([studentId, chapterId])
