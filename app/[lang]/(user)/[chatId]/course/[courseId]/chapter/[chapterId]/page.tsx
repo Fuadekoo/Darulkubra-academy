@@ -1,7 +1,7 @@
 import React from "react";
 
 function Page() {
-  return <div>this is a teacher page in admin</div>;
+  return <div>this is a final exam page</div>;
 }
 
 export default Page;

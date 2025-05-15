@@ -13,121 +13,162 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id        String   @id @default(cuid())
-  name      String
-  phoneno   String @unique
-  passcode  String
-  createdAt DateTime @default(now())
+enum UserType {
+  KIDS
+  GENERAL
+  ADULT
+
 }
 
-model Teacher {
-  id        String   @id @default(cuid())
-  name      String
-  phoneno   String @unique
-  passcode  String
-  isActive  Boolean  @default(true)
-  courses   Course[]
-  createdAt DateTime @default(now())
+model coursePackage {
+  id          String   @id @default(uuid())
+  name        String   @db.Text
+  description String?  @db.Text
+  userType   UserType
+  isPublished Boolean  @default(false)
+  courses     course[]
+  students    wpos_wpdatatable_23[] @relation("PackageHistory")
+  activeStudents wpos_wpdatatable_23[] @relation("ActivePackage")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-model Student {
+model course {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String   @db.Text
+  description String?  @db.Text
+  imageUrl    String?  @db.Text
+  isPublished Boolean  @default(false)
+  order       Int      // Determines sequence in package
+  packageId   String?
+  package     coursePackage? @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  timeLimit   Int?    // Time limit in days (e.g., 7 for 1 week, 30 for 1 month, etc.)
+  timeUnit    String? // Unit for time limit (e.g., 'days', 'weeks', 'months')
+  chapters    chapter[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([packageId])
+}
+
+
+model chapter {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @db.Text
+  videoUrl    String? @db.Text
+  position    Int
+  isPublished Boolean @default(false)
+  isFree      Boolean @default(false)
+
+  questions question[]
+
+  courseId String
+  course   course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  studentProgress studentProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model question {
+  id              String           @id @default(cuid())
+  chapter         chapter          @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId       String
+  question        String
+  questionOptions questionOption[]
+  questionAnswer  questionAnswer[]
+  studentQuiz     studentQuiz[]
+
+  @@index([chapterId])
+}
+
+model questionOption {
+  id                 String              @id @default(cuid())
+  question           question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId         String
+  option             String
+  questionAnswer     questionAnswer[]
+  studentQuizAnswers studentQuizAnswer[]
+
+  @@index([questionId])
+}
+
+model questionAnswer {
+  id         String         @id @default(cuid())
+  question   question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  answer     questionOption @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  answerId   String
+
+  @@index([answerId])
+  @@index([questionId])
+}
+
+model studentQuiz {
+  id                 String              @id @default(cuid())
+  student            wpos_wpdatatable_23 @relation(fields: [studentId], references: [wdt_ID], onDelete: Cascade)
+  studentId          Int
+  question           question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId         String
+  takenAt            DateTime            @default(now())
+  studentQuizAnswers studentQuizAnswer[]
+
+  @@unique([studentId, questionId])
+  @@index([questionId])
+  @@index([studentId])
+}
+
+model studentQuizAnswer {
+  id               String         @id @default(cuid())
+  studentQuiz      studentQuiz    @relation(fields: [studentQuizId], references: [id], onDelete: Cascade)
+  studentQuizId    String
+  selectedOption   questionOption @relation(fields: [selectedOptionId], references: [id], onDelete: Cascade)
+  selectedOptionId String
+
+  @@unique([studentQuizId, selectedOptionId])
+  @@index([selectedOptionId])
+  @@index([studentQuizId])
+}
+
+model studentProgress {
+  id          String              @id @default(cuid())
+  student     wpos_wpdatatable_23 @relation(fields: [studentId], references: [wdt_ID], onDelete: Cascade)
+  studentId   Int
+  chapter     chapter             @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId   String
+  isCompleted Boolean             @default(false)
+  completedAt DateTime?
+
+  @@unique([studentId, chapterId])
+  @@index([chapterId])
+  @@index([studentId])
+}
+
+model admin {
   id        String   @id @default(cuid())
   name      String
   phoneno   String   @unique
-  passcode  String   @unique
-  status    Boolean  @default(true)
-  startDate DateTime
-  chatId    String
-  progress  StudentProgress[]
-  studentQuizzes StudentQuiz[]
+  passcode  String
   createdAt DateTime @default(now())
 }
 
-// COURSE SYSTEM
-model Course {
-  id        String   @id @default(cuid())
-  title     String
-  description String
-  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  teacherId String
-  lessons   Lesson[]
-  createdAt DateTime @default(now())
-}
-
-model Lesson {
-  id        String   @id @default(cuid())
-  title     String
-  videoUrl  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId  String
-  // quiz      Quiz?
-  question   Question[]
-  order     Int
-  StudentProgress StudentProgress[]
-  createdAt DateTime @default(now())
-}
-
-
-model Question {
-  id             String           @id @default(cuid())
-  lesson         Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  lessonId       String
-  question       String
-  questionOptions QuestionOption[]
-  questionAnswer QuestionAnswer[]
-  StudentQuiz StudentQuiz[]
-}
-
-model QuestionOption {
-  id                String              @id @default(cuid())
-  question          Question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId        String
-  option            String
-  questionAnswer    QuestionAnswer[]
-  studentQuizAnswers StudentQuizAnswer[]
-}
-
-model QuestionAnswer {
-  id         String         @id @default(cuid())
-  question   Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId String
-  answer     QuestionOption @relation(fields: [answerId], references: [id], onDelete: Cascade)
-  answerId   String         @map("questionOptionId")
-}
-
-// STUDENT QUIZ PARTICIPATION
-model StudentQuiz {
-  id         String        @id @default(cuid())
-  student    Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId  String
-  question   Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId String
-  takenAt    DateTime      @default(now())
-  studentQuizAnswers StudentQuizAnswer[]
-
-  @@unique([studentId, questionId])
-}
-
-model StudentQuizAnswer {
-  id             String         @id @default(cuid())
-  studentQuiz    StudentQuiz    @relation(fields: [studentQuizId], references: [id], onDelete: Cascade)
-  studentQuizId  String
-  selectedOption QuestionOption @relation(fields: [optionId], references: [id])
-  optionId       String         @map("questionOptionId")
-
-  @@unique([studentQuizId, optionId])
-}
-
-// TRACK STUDENT LESSON PROGRESS
-model StudentProgress {
-  id        String   @id @default(cuid())
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId String
-  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  lessonId  String
-  completed Boolean  @default(false)
-  completedAt DateTime?
-  
-  @@unique([studentId, lessonId])
+model wpos_wpdatatable_23 {
+  wdt_ID         Int               @id @default(autoincrement())
+  name           String
+  passcode       String            @unique
+  phoneno        String            @unique
+  status         String
+  // History of all packages (many-to-many)
+  packages       coursePackage[]   @relation("PackageHistory")
+  // Active package (one-to-one or many-to-one)
+  subject        String?
+  activePackage  coursePackage?    @relation("ActivePackage", fields: [subject], references: [id])
+  progress       studentProgress[]
+  studentQuizzes studentQuiz[]
+  chat_id        String            @unique
 }
