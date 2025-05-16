@@ -38,36 +38,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         passcode: { label: "passcode", type: "number" },
       },
       async authorize(credentials) {
-        
         const { phoneno, passcode } = await loginSchema.parseAsync(credentials);
         let role = null;
-        let user = await prisma.student.findFirst({
+        let user = await prisma.admin.findFirst({
           where: { phoneno },
           select: { id: true, phoneno: true, passcode: true },
         });
 
         if (user) {
-          role = "student";
-        } else {
-          user = await prisma.teacher.findFirst({
-            where: { phoneno },
-            select: { id: true, phoneno: true, passcode: true },
-          });
-
-          if (user) {
-            role = "teacher";
-          } else {
-            user = await prisma.admin.findFirst({
-              where: { phoneno },
-              select: { id: true, phoneno: true, passcode: true },
-            });
-
-            if (user) {
-              role = "admin";
-            }
-          }
+          role = "admin";
         }
-        // console.log("meeeeeee11111");
 
         if (!user) throw new Error("Invalid phoneno");
 
