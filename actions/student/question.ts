@@ -38,13 +38,90 @@ export async function getQuestionForActivePackageLastChapter(chatId: string) {
       },
     },
   });
-  console.log("fuad");
-  console.log(student);
+
+  // display chapter data and question. rfistly gate the chapter id by compare the stuednttprogress with package active course and chapter.
+
+  // const activecourse =
+
   if (!student) {
     console.error("Student not found or not authorized.");
     throw new Error("Unauthorized: Student not found.");
   }
-  return student;
+
+  // 2. Get all student progress for this package
+  const studentProgress = await prisma.studentProgress.findMany({
+    where: {
+      student: { chat_id: chatId },
+      chapter: {
+        course: { packageId: student.activePackage?.id },
+      },
+    },
+    select: { chapterId: true },
+  });
+  const completedChapterIds = studentProgress.map((p) => p.chapterId);
+
+  // 3. Find the next chapter to work on
+  let nextChapter = null;
+  let currentCourse = null;
+
+  for (const course of student.activePackage?.courses ?? []) {
+    const courseChapterIds = course.chapters.map((ch) => ch.id);
+
+    // Check if all chapters in this course are completed
+    const allChaptersDone =
+      courseChapterIds.length > 0 &&
+      courseChapterIds.length ===
+        courseChapterIds.filter((id) => completedChapterIds.includes(id))
+          .length &&
+      courseChapterIds.every((v) => completedChapterIds.includes(v));
+
+    if (!allChaptersDone) {
+      // Find the first incomplete chapter in this course
+      for (const chapter of course.chapters) {
+        if (!completedChapterIds.includes(chapter.id)) {
+          nextChapter = chapter;
+          currentCourse = course;
+          break;
+        }
+      }
+      if (nextChapter) break;
+    }
+  }
+
+  // If all chapters are done, return null or a message
+  if (!nextChapter) {
+    return { message: "All chapters in the package are completed!" };
+  }
+
+  // Optionally, get full chapter data and questions
+  const chapterData = await prisma.chapter.findUnique({
+    where: { id: nextChapter.id },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      videoUrl: true,
+      position: true,
+      questions: {
+        select: {
+          id: true,
+          question: true,
+          questionOptions: { select: { id: true, option: true } },
+        },
+      },
+    },
+  });
+
+  const data = {
+    packageId: student.activePackage?.id,
+    packageName: student.activePackage?.name,
+    courseId: currentCourse?.id,
+    courseTitle: currentCourse?.title,
+    chapter: chapterData,
+  };
+  console.log(data);
+
+  return data;
 }
 
 //   // gate the last active chapter

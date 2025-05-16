@@ -9,40 +9,49 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import useAction from "@/hooks/useAction";
-import { getQuestionForActivePackageLastChapter } from "@/actions/student/question";
-
-// import StudentQuestionForm from "../../_components/StudentQuestionForm";
+import { getQuestionForActivePackageLastChapter } from "@/actions/student/test";
+import StudentQuestionForm from "@/components/custom/StudentQuestionForm";
 
 // --- Sample Data for Testing ---
-const sampleChapter = {
-  questions: [
-    {
-      id: "q1",
-      question: "What is React?",
-      questionOptions: [
-        { id: "o1", option: "A JavaScript library" },
-        { id: "o2", option: "A CSS framework" },
-        { id: "o3", option: "A database" },
-      ],
-    },
-    {
-      id: "q2",
-      question: "Which hook is used for state in React?",
-      questionOptions: [
-        { id: "o1", option: "useState" },
-        { id: "o2", option: "useEffect" },
-        { id: "o3", option: "useRouter" },
-      ],
-    },
-  ],
+// --- Sample Data for Testing ---
+const sampleData = {
+  progress: "5/8",
+  packageName: "Programming Fundamentals",
+  courseName: "React Basics",
+  chapterName: "Hooks Introduction",
+  chapter: {
+    chapterName: "Hooks Introduction",
+    chapterVideo:
+      "https://www.youtube.com/embed/2ONoyljSUGE?si=GZ4JkAzeqHeTCxAH",
+    questions: [
+      {
+        id: "q1",
+        question: "What is React?",
+        questionOptions: [
+          { id: "o1", option: "A JavaScript library" },
+          { id: "o2", option: "A CSS framework" },
+          { id: "o3", option: "A database" },
+        ],
+      },
+      {
+        id: "q2",
+        question: "Which hook is used for state in React?",
+        questionOptions: [
+          { id: "o1", option: "useState" },
+          { id: "o2", option: "useEffect" },
+          { id: "o3", option: "useRouter" },
+        ],
+      },
+    ],
+  },
 };
 // --------------------------------
 
 function Page() {
-  const [data, , isLoading] = useAction(
+  const [data, refresh, isLoading] = useAction(
     getQuestionForActivePackageLastChapter,
     [true, (response) => console.log(response)],
-    "chat_001"
+    "chat_002"
   );
 
   return (
@@ -50,15 +59,25 @@ function Page() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink>Kids</BreadcrumbLink>
+            <BreadcrumbLink>
+              {data && "packageName" in data ? data.packageName : "Package"}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>QaydadulNuraniya</BreadcrumbLink>
+            <BreadcrumbLink>
+              {" "}
+              {data && "packageName" in data ? data.courseTitle : "courseName"}
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>chapter1</BreadcrumbPage>
+            <BreadcrumbPage>
+              {" "}
+              {data && "packageName" in data
+                ? data.chapter?.title
+                : "chapterName"}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -70,7 +89,7 @@ function Page() {
       >
         <iframe
           className="absolute top-0 left-0 w-full h-full"
-          src="https://www.youtube.com/embed/2ONoyljSUGE?si=GZ4JkAzeqHeTCxAH"
+          src={`${sampleData.chapter.chapterVideo}`}
           title="Darulkubra video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -79,14 +98,22 @@ function Page() {
         ></iframe>
       </div>
       <div>
-        console.log(data);
-        {/* Student Question Form */}
-        {/* <StudentQuestionForm
-          chapter={chapter}
-          courseId={courseId}
-          chapterId={chapterId}
-          chat_id={chat_id}
-        /> */}
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : (
+          data &&
+          "chapter" in data &&
+          data.chapter &&
+          Array.isArray(data.chapter.questions) && (
+            <StudentQuestionForm
+              chapter={{
+                questions: data.chapter.questions,
+              }}
+            />
+          )
+        )}
+
+        {/* student question page */}
       </div>
     </div>
   );
