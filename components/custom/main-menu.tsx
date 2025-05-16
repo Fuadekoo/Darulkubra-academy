@@ -10,14 +10,14 @@ function MainMenu({ className }: { className?: string }) {
   return (
     <nav
       className={cn(
-        " bg-muted overflow-auto py-2 px-4 flex flex-col gap-4",
+        " bg-muted h-full overflow-auto py-2 px-4 flex flex-col gap-4",
         className
       )}
     >
-      <header className=" hidden md:block border-b dark:border-b-black border-b-zinc-200 pb-4">
+      <header className=" hidden md:block border-b dark:border-b-black border-b-zinc-200 pb-4 ">
         <MenuTitle />
       </header>
-      <ul className="py-4 grow ">
+      <ul className="py-4 grow">
         <MenuItems href="/dashboard">Dashboard</MenuItems>
         <MenuItems href="/dashboard/teams">analysis</MenuItems>
         {/* <MenuItems href="/dashboard/employees">employees</MenuItems>

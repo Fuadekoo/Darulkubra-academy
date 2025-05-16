@@ -104,10 +104,35 @@ export async function getStudentProgressPerPackage(
     const packageProgressNumber =
       totalCourses > 0 ? completedCourses / totalCourses : 0;
 
+    // Calculate total and completed chapters for the whole package
+    let totalChaptersInPackage = 0;
+    let completedChaptersInPackage = 0;
+
+    for (const courseId in grouped) {
+      const allChapters = grouped[courseId].map((ch) => ch.id);
+      const completedChapters = (groupedProgress[courseId] || [])
+        .filter((ch) => ch.isCompleted)
+        .map((ch) => ch.chapterId);
+
+      totalChaptersInPackage += allChapters.length;
+      completedChaptersInPackage += completedChapters.length;
+    }
+
+    // Package progress: chapters completed out of total chapters
+    const packageProgressFractionChapter = `${completedChaptersInPackage}/${totalChaptersInPackage}`;
+    const packageProgressNumberChapter =
+      totalChaptersInPackage > 0
+        ? completedChaptersInPackage / totalChaptersInPackage
+        : 0;
+
     return {
       packageProgress: {
         completedCourses,
         totalCourses,
+        completedChapters: completedChaptersInPackage,
+        totalChapter: totalChaptersInPackage,
+        ChapterFraction: packageProgressFractionChapter,
+        ChapterNumber: packageProgressNumberChapter,
         fraction: packageProgressFraction,
         number: packageProgressNumber,
       },

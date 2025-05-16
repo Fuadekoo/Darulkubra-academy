@@ -29,7 +29,7 @@ export async function getCoursebyId(courseId: string) {
   try {
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      include: { lessons: true },
+      include: { chapters },
     });
     return course;
   } catch (error) {
