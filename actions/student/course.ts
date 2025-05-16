@@ -3,33 +3,52 @@ import { prisma } from "@/lib/db";
 import { isAuthorized } from "@/lib/isAuthorized";
 import { Lesson } from "@/lib/zodSchema";
 
-export async function getCourse() {
+export async function getCourse(packageId: string) {
   //   const student = await isAuthorized("student");
   const allCourses = await prisma.course.findMany({
+    where: {
+      packageId: packageId,
+      isPublished: true,
+    },
     select: {
       id: true,
       title: true,
-      description: true,
-
-      teacher: {
+      order: true,
+      chapters: {
         select: {
-          name: true,
+          id: true,
+          title: true,
+          position: true,
+          isPublished: true,
         },
+        orderBy: { position: "asc" },
       },
+      description: true,
     },
+    orderBy: { order: "asc" },
   });
   return allCourses;
 }
 
 export async function getCoursebyId(courseId: string) {
-  const student = await isAuthorized("student");
-  if (!student) {
-    throw new Error("Unauthorized: Student ID is undefined");
-  }
   try {
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      include: { chapters },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        order: true,
+        chapters: {
+          select: {
+            id: true,
+            title: true,
+            position: true,
+            isPublished: true,
+          },
+          orderBy: { position: "asc" },
+        },
+      },
     });
     return course;
   } catch (error) {
@@ -39,10 +58,6 @@ export async function getCoursebyId(courseId: string) {
 }
 
 export async function courseDetail(courseId: string) {
-  const student = await isAuthorized("student");
-  if (!student) {
-    throw new Error("Unauthorized: Student ID is undefined");
-  }
   try {
     const course = await prisma.course.findUnique({
       where: { id: courseId },
@@ -50,37 +65,22 @@ export async function courseDetail(courseId: string) {
         id: true,
         title: true,
         description: true,
-        teacher: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        lessons: {
+        order: true,
+        chapters: {
           select: {
             id: true,
             title: true,
+            position: true,
+            isPublished: true,
             videoUrl: true,
-            order: true,
-            question: {
+            questions: {
               select: {
-                id: true,
                 question: true,
-                questionOptions: {
-                  select: {
-                    id: true,
-                    option: true,
-                  },
-                },
-                questionAnswer: {
-                  select: {
-                    answerId: true,
-                  },
-                },
+                questionOptions: true,
               },
             },
           },
-          orderBy: { order: "asc" },
+          orderBy: { position: "asc" },
         },
       },
     });

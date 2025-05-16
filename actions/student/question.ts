@@ -435,3 +435,13 @@ export async function correctAnswer(chapterId: string, studentId: number) {
     throw new Error("Failed to calculate the correct answers.");
   }
 }
+
+type AnswerPair = { questionId: string; answerId: string };
+export async function submitAnswers(answers: AnswerPair[]) {
+  const results = [];
+  for (const { questionId, answerId } of answers) {
+    // 1. Check if studentExam already exists .if answer update it.
+
+    
+  }
+}

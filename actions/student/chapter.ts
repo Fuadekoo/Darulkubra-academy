@@ -12,7 +12,6 @@ export default async function getActiveChapter(
       where: {
         id: chapterId,
         courseId: courseId,
-        isFree: true,
       },
       select: {
         title: true,
@@ -22,6 +21,16 @@ export default async function getActiveChapter(
           select: {
             question: true,
             questionOptions: true,
+            questionAnswer: true,
+            studentQuiz: {
+              select: {
+                studentQuizAnswers: {
+                  select: {
+                    selectedOption: { select: { id: true, option: true } },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -113,9 +122,11 @@ export async function unlockingNextChapter(
 
       if (nextChapter) {
         console.log("Unlocking next chapter with id:", nextChapter.id);
-        await prisma.chapter.update({
-          where: { id: nextChapter.id, position: prevChapter.position + 1 },
-          data: { isFree: true },
+        await prisma.studentProgress.create({
+          data: {
+            studentId: student.wdt_ID,
+            chapterId: nextChapter.id,
+          },
         });
       } else {
         const course = await prisma.course.findFirst({

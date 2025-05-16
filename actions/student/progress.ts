@@ -143,3 +143,27 @@ export async function getStudentProgressPerPackage(
     throw error;
   }
 }
+
+export async function getActivePackageProgeess(chatId: string) {
+  const packageProgress = await prisma.wpos_wpdatatable_23.findFirst({
+    where: {
+      chat_id: chatId,
+    },
+    select: {
+      activePackage: {
+        select: { id: true, name: true },
+      },
+    },
+  });
+
+  const progress = await prisma.studentProgress.count({
+    where: {
+      student: { chat_id: chatId },
+      chapter: {
+        // course: {
+        //   packageId: packageProgress?.activePackage.id,
+        // },
+      },
+    },
+  });
+}
