@@ -5,11 +5,19 @@ import MenuTitle from "@/components/custom/menu-title";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { MenuIcon } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
+// import * as React from "react";
+import { Progress } from "@/components/ui/progress";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const isDesktop = useMediaQuery("(max-width: 768px)");
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [progress, setProgress] = React.useState(13);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setProgress(66), 500);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div className="md:grid md:grid-cols-[250px_1fr] h-screen">
       <MainMenu className="hidden md:flex" />
@@ -31,9 +39,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Drawer>
         </div>
       )}
-      <div className="overflow-auto py-2 px-4">
-        <h1>Welcome Back,Fuad</h1>
-        {children}
+      <div className="overflow-y-auto py-2  overflow-x-hidden">
+        {/* Desktop: Progress bar fixed at top, Mobile: Progress bar below menu */}
+        {!isDesktop && (
+          <div className="fixed top-0 w-dvw shadow-md p-4 z-40 bg-background ">
+            <Progress value={progress} className="w-[60%] mx-auto mb-2" />
+            {/* <div>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/components">
+                      Components
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div> */}
+          </div>
+        )}
+        <div className={`px-4 ${isDesktop ? "pt-0" : "pt-10"}`}>{children}</div>
       </div>
     </div>
   );

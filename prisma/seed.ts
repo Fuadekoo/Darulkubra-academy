@@ -11,10 +11,9 @@ const prisma = new PrismaClient();
   //   prisma.question.deleteMany(),
   //   prisma.studentProgress.deleteMany(),
   //   prisma.chapter.deleteMany(),
-  //   prisma.studentPackage.deleteMany(),
   //   prisma.course.deleteMany(),
-  //   prisma.package.deleteMany(),
-  //   prisma.wpos_wpdatatable_23.deleteMany(),
+  //   prisma.coursePackage.deleteMany(),
+  //   prisma.wposWpdatatable23.deleteMany(),
   //   prisma.admin.deleteMany(),
   // ]);
 
@@ -64,25 +63,45 @@ const prisma = new PrismaClient();
       {
         id: "pkg_001",
         name: "Programming Fundamentals",
-        description: "Learn core programming concepts from scratch",
-        // imageUrl: "https://example.com/prog-fundamentals.jpg",
-        isPublished: true,
+        userType: "GENERAL",
       },
       {
         id: "pkg_002",
         name: "Web Development",
-        description: "Full-stack web development course",
-        // imageUrl: "https://example.com/web-dev.jpg",
-        isPublished: true,
+        userType: "GENERAL",
       },
       {
         id: "pkg_003",
         name: "Data Science",
-        description: "Introduction to data analysis and ML",
-        // imageUrl: "https://example.com/data-science.jpg",
-        isPublished: false, // Unpublished package for testing
+        userType: "ADULT",
+        // isPublished: false, // Unpublished package for testing
       },
     ],
+  });
+
+  // Assign packages to students
+  await prisma.wpos_wpdatatable_23.update({
+    where: { wdt_ID: 1001 },
+    data: {
+      packages: {
+        connect: [{ id: "pkg_001" }, { id: "pkg_002" }],
+      },
+      activePackage: {
+        connect: { id: "pkg_001" },
+      },
+    },
+  });
+
+  await prisma.wpos_wpdatatable_23.update({
+    where: { wdt_ID: 1002 },
+    data: {
+      packages: {
+        connect: [{ id: "pkg_001" }],
+      },
+      activePackage: {
+        connect: { id: "pkg_001" },
+      },
+    },
   });
 
   // Seed Courses for Programming Package
@@ -146,7 +165,6 @@ const prisma = new PrismaClient();
         description: "Learn about variables and basic data types",
         position: 1,
         isPublished: true,
-        isFree: true,
         courseId: "course_001",
         videoUrl: "https://example.com/videos/variables.mp4",
       },
@@ -274,8 +292,6 @@ const prisma = new PrismaClient();
       )!.id,
     },
   });
-
-  // Student 3 - No enrollments (new student)
 
   // Seed Student Progress for Completed Student
   await prisma.studentProgress.createMany({

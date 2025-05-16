@@ -14,7 +14,7 @@ function MainMenu({ className }: { className?: string }) {
         className
       )}
     >
-      <header className=" hidden md:block border-b dark:border-b-black border-b-zinc-200 pb-4 ">
+      <header className=" hidden md:block border-b dark:border-b-black border-b-zinc-200">
         <MenuTitle />
       </header>
       <ul className="py-4 grow">

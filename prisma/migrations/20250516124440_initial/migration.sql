@@ -2,9 +2,7 @@
 CREATE TABLE `coursePackage` (
     `id` VARCHAR(191) NOT NULL,
     `name` TEXT NOT NULL,
-    `description` TEXT NULL,
     `userType` ENUM('KIDS', 'GENERAL', 'ADULT') NOT NULL DEFAULT 'GENERAL',
-    `isPublished` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -38,7 +36,6 @@ CREATE TABLE `chapter` (
     `videoUrl` TEXT NULL,
     `position` INTEGER NOT NULL,
     `isPublished` BOOLEAN NOT NULL DEFAULT false,
-    `isFree` BOOLEAN NOT NULL DEFAULT false,
     `courseId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -108,6 +105,7 @@ CREATE TABLE `studentProgress` (
     `id` VARCHAR(191) NOT NULL,
     `studentId` INTEGER NOT NULL,
     `chapterId` VARCHAR(191) NOT NULL,
+    `isStarted` BOOLEAN NOT NULL DEFAULT true,
     `isCompleted` BOOLEAN NOT NULL DEFAULT false,
     `completedAt` DATETIME(3) NULL,
 
