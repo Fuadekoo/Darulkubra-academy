@@ -437,11 +437,62 @@ export async function correctAnswer(chapterId: string, studentId: number) {
 }
 
 type AnswerPair = { questionId: string; answerId: string };
-export async function submitAnswers(answers: AnswerPair[]) {
-  const results = [];
-  for (const { questionId, answerId } of answers) {
-    // 1. Check if studentExam already exists .if answer update it.
 
-    
+export async function submitAnswers(answers: AnswerPair[], chatId: string) {
+  if (!answers.length) throw new Error("No answers provided.");
+
+  const results = [];
+  const student = await prisma.wpos_wpdatatable_23.findFirst({
+    where: {
+      chat_id: chatId,
+      status: { in: ["active", "notyet"] },
+    },
+    select: {
+      wdt_ID: true,
+    },
+  });
+
+  if (!student || !student.wdt_ID) {
+    throw new Error("Student not found or not authorized.");
   }
+  const studentId = student.wdt_ID;
+  for (const { questionId, answerId } of answers) {
+    // Find or create the studentQuiz record for this student and question
+    let studentQuiz = await prisma.studentQuiz.findFirst({
+      where: { studentId, questionId },
+    });
+
+    if (!studentQuiz) {
+      studentQuiz = await prisma.studentQuiz.create({
+        data: { studentId, questionId },
+      });
+    }
+
+    // Check if an answer already exists for this studentQuiz
+    const existingAnswer = await prisma.studentQuizAnswer.findFirst({
+      where: {
+        studentQuizId: studentQuiz.id,
+        selectedOptionId: answerId,
+      },
+    });
+
+    if (!existingAnswer) {
+      // Remove any previous answers for this question (if single-answer)
+      await prisma.studentQuizAnswer.deleteMany({
+        where: { studentQuizId: studentQuiz.id },
+      });
+
+      // Create new answer
+      const newAnswer = await prisma.studentQuizAnswer.create({
+        data: {
+          studentQuizId: studentQuiz.id,
+          selectedOptionId: answerId,
+        },
+      });
+      results.push(newAnswer);
+    } else {
+      results.push(existingAnswer);
+    }
+  }
+  return { success: true, submitted: results.length };
 }

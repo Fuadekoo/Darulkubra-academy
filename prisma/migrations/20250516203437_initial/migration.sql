@@ -33,7 +33,7 @@ CREATE TABLE `chapter` (
     `id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `description` TEXT NULL,
-    `videoUrl` TEXT NULL,
+    `videoUrl` TEXT NOT NULL,
     `position` INTEGER NOT NULL,
     `isPublished` BOOLEAN NOT NULL DEFAULT false,
     `courseId` VARCHAR(191) NOT NULL,

@@ -11,47 +11,15 @@ import {
 import useAction from "@/hooks/useAction";
 import { getQuestionForActivePackageLastChapter } from "@/actions/student/test";
 import StudentQuestionForm from "@/components/custom/StudentQuestionForm";
-
-// --- Sample Data for Testing ---
-// --- Sample Data for Testing ---
-const sampleData = {
-  progress: "5/8",
-  packageName: "Programming Fundamentals",
-  courseName: "React Basics",
-  chapterName: "Hooks Introduction",
-  chapter: {
-    chapterName: "Hooks Introduction",
-    chapterVideo:
-      "https://www.youtube.com/embed/2ONoyljSUGE?si=GZ4JkAzeqHeTCxAH",
-    questions: [
-      {
-        id: "q1",
-        question: "What is React?",
-        questionOptions: [
-          { id: "o1", option: "A JavaScript library" },
-          { id: "o2", option: "A CSS framework" },
-          { id: "o3", option: "A database" },
-        ],
-      },
-      {
-        id: "q2",
-        question: "Which hook is used for state in React?",
-        questionOptions: [
-          { id: "o1", option: "useState" },
-          { id: "o2", option: "useEffect" },
-          { id: "o3", option: "useRouter" },
-        ],
-      },
-    ],
-  },
-};
-// --------------------------------
+import { useParams } from "next/navigation";
 
 function Page() {
+  const params = useParams();
+  const chatId = String(params.chatId);
   const [data, refresh, isLoading] = useAction(
     getQuestionForActivePackageLastChapter,
     [true, (response) => console.log(response)],
-    "chat_002"
+    chatId
   );
 
   return (
@@ -89,7 +57,7 @@ function Page() {
       >
         <iframe
           className="absolute top-0 left-0 w-full h-full"
-          src={`${sampleData.chapter.chapterVideo}`}
+          src={`${data && "chapter" in data ? data.chapter?.videoUrl : ""}`}
           title="Darulkubra video player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -100,15 +68,22 @@ function Page() {
       <div>
         {isLoading ? (
           <div>Loading...</div>
+        ) : !data ? (
+          <div>No data found.</div>
+        ) : "message" in data ? (
+          <div className="text-center text-lg text-green-600 py-10">
+            {data.message}
+          </div>
         ) : (
-          data &&
-          "chapter" in data &&
           data.chapter &&
           Array.isArray(data.chapter.questions) && (
             <StudentQuestionForm
               chapter={{
                 questions: data.chapter.questions,
               }}
+              chatId={chatId}
+              courseId={data.courseId}
+              chapterId={data.chapter.id}
             />
           )
         )}

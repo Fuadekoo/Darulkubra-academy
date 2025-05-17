@@ -15,6 +15,7 @@ export async function getQuestionForActivePackageLastChapter(chatId: string) {
         select: {
           id: true,
           name: true,
+          userType: true,
           courses: {
             select: {
               id: true,
@@ -25,6 +26,7 @@ export async function getQuestionForActivePackageLastChapter(chatId: string) {
                   id: true,
                   title: true,
                   position: true,
+                  videoUrl: true,
                   isPublished: true,
                 },
                 orderBy: { position: "asc" },

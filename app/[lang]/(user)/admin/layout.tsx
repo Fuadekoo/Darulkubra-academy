@@ -15,7 +15,7 @@ export default async function layout({
   if (session?.user?.role !== "admin") redirect(`/en/${session?.user?.role}`);
   return (
     <div>
-      <UserLayout
+      {/* <UserLayout
         menu={[
           {
             label: "dashboard",
@@ -33,9 +33,9 @@ export default async function layout({
             icon: <PersonStandingIcon className="size-4" />,
           },
         ]}
-      >
+      > */}
         {children}
-      </UserLayout>
+      {/* </UserLayout> */}
     </div>
   );
 }

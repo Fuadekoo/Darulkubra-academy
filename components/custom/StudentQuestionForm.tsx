@@ -1,9 +1,11 @@
 "use client";
-// import { unlockingNextChapter } from "@/actions/unlocking-next-chapter";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import useAction from "@/hooks/useAction";
+import { submitAnswers } from "@/actions/student/question";
+import { unlockingNextChapter } from "@/actions/student/chapter";
+import { toast } from "sonner";
 
 interface StudentQuestionFormProps {
   chapter: {
@@ -13,33 +15,60 @@ interface StudentQuestionFormProps {
       questionOptions: { id: string; option: string }[];
     }[];
   } | null;
+  chatId: string;
+  courseId: string;
+  chapterId: string;
 }
 
-const StudentQuestionForm = ({ chapter }: StudentQuestionFormProps) => {
+const StudentQuestionForm = ({
+  chapter,
+  chatId,
+  courseId,
+  chapterId,
+}: StudentQuestionFormProps) => {
   const [selectedAnswers, setSelectedAnswers] = useState<
-    Record<string, string[]>
+    Record<string, string>
   >({});
-
   const router = useRouter();
 
-  async function handleSubmit() {}
+  // UseAction expects: (answers, chatId)
+  const [submitAnswersAction, data, response] = useAction(submitAnswers, [
+    ,
+    (response) => console.log(response),
+  ]);
+  // unlock next chapter
+  const [unlockdata, unlockaction, unlockmethod] = useAction(
+    unlockingNextChapter,
+    [, (response) => console.log(response)]
+  );
 
   const handleOptionChange = (questionId: string, optionId: string) => {
-    setSelectedAnswers((prev) => {
-      const currentAnswers = prev[questionId] || [];
-      if (currentAnswers.includes(optionId)) {
-        return {
-          ...prev,
-          [questionId]: currentAnswers.filter((id) => id !== optionId),
-        };
-      } else {
-        return {
-          ...prev,
-          [questionId]: [...currentAnswers, optionId],
-        };
-      }
-    });
+    setSelectedAnswers((prev) => ({
+      ...prev,
+      [questionId]: optionId,
+    }));
   };
+
+  async function handleSubmit() {
+    if (!chapter) return;
+
+    const answers = Object.entries(selectedAnswers).map(
+      ([questionId, answerId]) => ({
+        questionId,
+        answerId,
+      })
+    );
+
+    try {
+      await data(answers, chatId);
+      toast.success("Answers submitted!");
+      await unlockaction(courseId, chapterId, chatId);
+      toast.success("Next chapter unlocked!");
+      router.refresh();
+    } catch (e) {
+      toast.error("Failed to submit answers.");
+    }
+  }
 
   let questionNo = 1;
   return (
@@ -54,24 +83,20 @@ const StudentQuestionForm = ({ chapter }: StudentQuestionFormProps) => {
                 className="p-4 border rounded-md bg-slate-100"
               >
                 <h3 className="font-medium">
-                  {questionNo++}, {question.question}
+                  {questionNo++}. {question.question}
                 </h3>
                 <ul className="mt-2 space-y-2">
                   {question.questionOptions.map((option) => (
                     <li
                       key={option.id}
-                      className="p-2 border rounded-md bg-white has-[input:checked]:bg-sky-100 has-[input:checked]:border-sky-300 has-[input:checked]:text-sky-700 "
+                      className="p-2 border rounded-md bg-white"
                     >
-                      <label className="flex items-center gap-x-2 ">
+                      <label className="flex items-center gap-x-2">
                         <input
-                          className="hidden"
-                          type="checkbox"
+                          type="radio"
                           name={`question-${question.id}`}
                           value={option.id}
-                          checked={
-                            selectedAnswers[question.id]?.includes(option.id) ||
-                            false
-                          }
+                          checked={selectedAnswers[question.id] === option.id}
                           onChange={() =>
                             handleOptionChange(question.id, option.id)
                           }
