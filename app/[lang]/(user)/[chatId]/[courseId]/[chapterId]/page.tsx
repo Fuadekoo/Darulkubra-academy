@@ -63,7 +63,11 @@ function Page() {
         ) : (
             <iframe
             className="absolute top-0 left-0 w-full h-full"
-            src={data && "chapter" in data ? data.chapter?.videoUrl : undefined}
+            src={
+              data && "chapter" in data && data.chapter?.videoUrl
+              ? `https://www.youtube.com/embed/${data.chapter.videoUrl}`
+              : ""
+            }
             title="Darulkubra video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -78,8 +82,23 @@ function Page() {
         ) : !data ? (
           <div>No data found.</div>
         ) : "message" in data ? (
-          <div className="text-center text-lg text-green-600 py-10">
-            {data.message}
+          <div className="flex flex-col items-center justify-center">
+            <svg
+              className="w-12 h-12 text-green-600 mb-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <span className="text-center text-xl font-bold text-green-700">
+              {data.message}
+            </span>
           </div>
         ) : (
           data.chapter &&

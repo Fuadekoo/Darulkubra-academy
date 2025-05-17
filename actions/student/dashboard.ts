@@ -23,4 +23,13 @@ export async function getpackage(chatId: string) {
   return myPackageList;
 }
 
+export async function getstudentId(chatid:string){
+  const studentId = await prisma.wpos_wpdatatable_23.findFirst({
+    where: { chat_id: chatid },
+    select: { wdt_ID: true },
+  });
+  return studentId?.wdt_ID;
+  
+}
+
 

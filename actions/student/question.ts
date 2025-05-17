@@ -1,6 +1,6 @@
 "use server";
 import { prisma } from "@/lib/db";
-import unlockingNextChapterfuad, { unlock_me } from "@/actions/student/unlock";
+import { unlockingNextChapter } from "@/actions/student/unlock";
 // get a question for the specific chapter by pass the  chatid packageid,courseid and chapterid help me
 export async function getQuestionForActivePackageLastChapter(chatId: string) {
   // get student
@@ -439,7 +439,12 @@ export async function correctAnswer(chapterId: string, studentId: number) {
 
 type AnswerPair = { questionId: string; answerId: string };
 
-export async function submitAnswers(answers: AnswerPair[], chatId: string) {
+export async function submitAnswers(
+  answers: AnswerPair[],
+  chatId: string,
+  courseId: string,
+  chapterId: string
+) {
   if (!answers.length) throw new Error("No answers provided.");
 
   const results = [];
@@ -450,8 +455,11 @@ export async function submitAnswers(answers: AnswerPair[], chatId: string) {
     },
     select: {
       wdt_ID: true,
+      packages: { select: { id: true } },
     },
   });
+
+  const packageId = student?.packages[0]?.id;
 
   if (!student || !student.wdt_ID) {
     throw new Error("Student not found or not authorized.");
@@ -495,7 +503,9 @@ export async function submitAnswers(answers: AnswerPair[], chatId: string) {
       results.push(existingAnswer);
     }
   }
-  await unlock_me(chatId);
+  await unlockingNextChapter(chatId, courseId, chapterId, packageId ?? "");
+  // await unlock(chatId);
+  // await unlock_me(chatId);
   // await unlockingNextChapterfuad(chatId);
   return { success: true, submitted: results.length };
 }
