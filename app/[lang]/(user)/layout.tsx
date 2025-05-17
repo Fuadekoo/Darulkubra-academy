@@ -5,13 +5,16 @@ import MenuTitle from "@/components/custom/menu-title";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { MenuIcon } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
-// import * as React from "react";
+import { useParams } from "next/navigation";
+import useAction from "@/hooks/useAction";
+import { getActivePackageProgress } from "@/actions/student/progress";
 import { Progress } from "@/components/ui/progress";
-async function fetchProgressData() {
-  return {
-    completed: 5,
-    total: 8,
-  };
+
+// Skeleton loader for progress bar
+function ProgressSkeleton() {
+  return (
+    <div className="w-[60%] mx-auto h-4 bg-gray-200 rounded animate-pulse mb-2" />
+  );
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -22,16 +25,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [completed, setCompleted] = useState(0);
   const [total, setTotal] = useState(1); // set to 1 to avoid division by zero
 
+  // UseAction for progress data
+  const [progressData, refresh, isLoading] = useAction(
+    getActivePackageProgress,
+    [true, (response) => console.log(response)],
+    String(useParams().chatId)
+  );
+
   useEffect(() => {
-    async function loadProgress() {
-      const data = await fetchProgressData(); // call backend here
-      const percent = (data.completed / data.total) * 100;
-      setCompleted(data.completed);
-      setTotal(data.total);
-      setProgress(percent);
+    if (progressData && !isLoading) {
+      const completedChapters = progressData.completedChapters || 0;
+      const totalChapters = progressData.totalChapters || 1;
+      setCompleted(completedChapters);
+      setTotal(totalChapters);
+      setProgress((completedChapters / totalChapters) * 100);
     }
-    loadProgress();
-  }, []);
+  }, [progressData, isLoading]);
+
   return (
     <div className="md:grid md:grid-cols-[250px_1fr] h-screen">
       <MainMenu className="hidden md:flex" />
@@ -57,29 +67,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Desktop: Progress bar fixed at top, Mobile: Progress bar below menu */}
         {!isDesktop && (
           <div className="fixed top-0 w-dvw shadow-md p-4 z-40 bg-background ">
-            <Progress value={progress} className="w-[60%] mx-auto mb-2" />
-            <div className="text-green-500 text-sm text-center mt-1">
-              {completed} / {total}
-            </div>
-            {/* <div>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/components">
-                      Components
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div> */}
+            {isLoading ? (
+              <ProgressSkeleton />
+            ) : (
+              <>
+                <Progress value={progress} className="w-[60%] mx-auto mb-2" />
+                <div className="text-green-500 text-sm text-center mt-1">
+                  {completed} / {total}
+                </div>
+              </>
+            )}
           </div>
         )}
         <div className={`px-4 ${isDesktop ? "pt-0" : "pt-10"}`}>{children}</div>

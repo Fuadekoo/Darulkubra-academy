@@ -183,3 +183,62 @@ export async function getStudentProgressPerChapter(
   });
   return progress;
 }
+
+export async function getActivePackageProgress(chatId: string) {
+  try {
+    // Fetch student with active package, courses, and chapters
+    const student = await prisma.wpos_wpdatatable_23.findFirst({
+      where: {
+        chat_id: chatId,
+        status: { in: ["active", "notyet"] },
+      },
+      select: {
+        wdt_ID: true,
+        activePackage: {
+          select: {
+            id: true,
+            name: true,
+            courses: {
+              select: {
+                id: true,
+                chapters: {
+                  select: { id: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!student || !student.activePackage) {
+      return null;
+    }
+
+    // Count total chapters in all courses
+    const totalChapters = student.activePackage.courses.reduce(
+      (sum, course) => sum + course.chapters.length,
+      0
+    );
+
+    // Get all chapter IDs in the package
+    const chapterIds = student.activePackage.courses.flatMap((course) =>
+      course.chapters.map((chapter) => chapter.id)
+    );
+
+    // Count completed chapters for this student
+    const completedChapters = await prisma.studentProgress.count({
+      where: {
+        studentId: student.wdt_ID,
+        chapterId: { in: chapterIds },
+        isCompleted: true,
+      },
+    });
+
+    const progress = { totalChapters, completedChapters };
+    return progress;
+  } catch (error) {
+    console.error("Error in getActivePackageProgress:", error);
+    return null;
+  }
+}

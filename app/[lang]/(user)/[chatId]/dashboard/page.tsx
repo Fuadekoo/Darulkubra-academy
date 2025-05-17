@@ -98,6 +98,7 @@ function CourseData() {
       </div>
 
       <div>
+        <h1 className="text-2xl font-bold mb-4">Active Course Package progress</h1>
         {isLoading ? (
           <div>Loading...</div>
         ) : !data ? (
