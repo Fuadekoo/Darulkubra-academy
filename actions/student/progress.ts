@@ -242,3 +242,74 @@ export async function getActivePackageProgress(chatId: string) {
     return null;
   }
 }
+
+// last chapter progress then i wentt o rerutn thr last courseand chapter
+export async function pathProgressData(chatId: string) {
+  try {
+    let pathData: { chapter: { id: string; course: { id: string } } } | null = null;
+
+    // Try to get the last chapter progress for the student
+    const lastChapter = await prisma.studentProgress.findFirst({
+      where: {
+        student: { chat_id: chatId },
+      },
+      orderBy: {
+        chapter: {
+          createdAt: "desc",
+        },
+      },
+      select: {
+        chapter: {
+          select: {
+            id: true,
+            course: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (lastChapter && lastChapter.chapter) {
+      pathData = lastChapter;
+    } else {
+      // If no progress found, get the first course and its first chapter
+      const firstCourse = await prisma.course.findFirst({
+        where: {
+          order: 1,
+        },
+        select: {
+          id: true,
+          chapters: {
+            where: {
+              position: 1,
+            },
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      if (firstCourse && firstCourse.chapters.length > 0) {
+        pathData = {
+          chapter: {
+            id: firstCourse.chapters[0].id,
+            course: {
+              id: firstCourse.id,
+            },
+          },
+        };
+      } else {
+        pathData = null;
+      }
+    }
+
+    return pathData;
+  } catch (error) {
+    console.error("Error fetching last chapter progress:", error);
+    throw error;
+  }
+}
