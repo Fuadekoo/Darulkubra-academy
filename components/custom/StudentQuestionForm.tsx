@@ -5,8 +5,8 @@ import { useState } from "react";
 import useAction from "@/hooks/useAction";
 import { correctAnswer } from "@/actions/student/question";
 import { submitAnswers } from "@/actions/student/question";
-import { unlockingNextChapterFunction } from "@/actions/student/chapter";
-import { unlockingNextChapter } from "@/actions/student/chapter";
+// import { unlockingNextChapterFunction } from "@/actions/student/chapter";
+// import { unlockingNextChapter } from "@/actions/student/chapter";
 import { toast } from "sonner";
 
 interface StudentQuestionFormProps {
@@ -38,12 +38,7 @@ const StudentQuestionForm = ({
     ,
     (response) => console.log(response),
   ]);
-  // unlock next chapter
-  const [unlockdata, unlockaction, unlockmethod] = useAction(
-    unlockingNextChapter,
-    [, (response) => console.log(response)]
-  );
-
+  
   const handleOptionChange = (questionId: string, optionId: string) => {
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -64,7 +59,7 @@ const StudentQuestionForm = ({
     try {
       data(answers, chatId);
       toast.success("Answers submitted!");
-      unlockingNextChapterFunction(courseId, chapterId, chatId);
+      
       toast.success("Next chapter unlocked!");
       router.refresh();
     } catch (e) {

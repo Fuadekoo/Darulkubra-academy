@@ -1,4 +1,3 @@
- 
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,39 +11,37 @@ enum UserType {
   KIDS
   GENERAL
   ADULT
-
 }
 
 model coursePackage {
-  id          String   @id @default(uuid())
-  name        String   @db.Text
-  userType   UserType  @default(GENERAL)
-  courses     course[]
-  students    wpos_wpdatatable_23[] @relation("PackageHistory")
+  id             String                @id @default(uuid())
+  name           String                @db.Text
+  userType       UserType              @default(GENERAL)
+  courses        course[]
+  students       wpos_wpdatatable_23[] @relation("PackageHistory")
   activeStudents wpos_wpdatatable_23[] @relation("ActivePackage")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
 }
 
 model course {
-  id          String   @id @default(uuid())
+  id          String         @id @default(uuid())
   userId      String
-  title       String   @db.Text
-  description String?  @db.Text
-  imageUrl    String?  @db.Text
-  isPublished Boolean  @default(false)
-  order       Int      // Determines sequence in package
+  title       String         @db.Text
+  description String?        @db.Text
+  imageUrl    String?        @db.Text
+  isPublished Boolean        @default(false)
+  order       Int // Determines sequence in package
   packageId   String?
   package     coursePackage? @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  timeLimit   Int?    // Time limit in days (e.g., 7 for 1 week, 30 for 1 month, etc.)
+  timeLimit   Int? // Time limit in days (e.g., 7 for 1 week, 30 for 1 month, etc.)
   timeUnit    String? // Unit for time limit (e.g., 'days', 'weeks', 'months')
   chapters    chapter[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@index([packageId])
 }
-
 
 model chapter {
   id          String  @id @default(uuid())
@@ -53,7 +50,6 @@ model chapter {
   videoUrl    String  @db.Text
   position    Int
   isPublished Boolean @default(false)
-
 
   questions question[]
 
@@ -134,9 +130,9 @@ model studentProgress {
   studentId   Int
   chapter     chapter             @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   chapterId   String
-  isStarted  Boolean            @default(true)
-  isCompleted Boolean            @default(false)
-  completedAt DateTime?
+  isStarted   Boolean             @default(true)
+  isCompleted Boolean             @default(false)
+  completedAt DateTime            @updatedAt
 
   @@unique([studentId, chapterId])
   @@index([chapterId])

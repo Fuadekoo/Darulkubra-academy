@@ -19,17 +19,20 @@ import Link from "next/link";
 import useAction from "@/hooks/useAction";
 import { getPackageData } from "@/actions/student/package";
 import { getStudentProgressPerChapter } from "@/actions/student/progress";
+import { useParams } from "next/navigation";
 
 function CourseData() {
+  const params = useParams();
+  const chatId = String(params.chatId);
   const completecoursepersent = 66;
   const [data, refresh, isLoading] = useAction(
     getPackageData,
     [true, (response) => console.log(response)],
-    "chat_001"
+    chatId
   );
 
   // This should return: [{ chapterId: string, isCompleted: boolean }, ...] or null/undefined
-  const [chapterprogress] = useAction(
+  const [chapterprogress, refreshdata, isLoadingProgress] = useAction(
     getStudentProgressPerChapter,
     [true, (response) => console.log(response)],
     "chapter_001",
@@ -98,7 +101,9 @@ function CourseData() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold mb-4">Active Course Package progress</h1>
+        <h1 className="text-2xl font-bold mb-4">
+          Active Course Package progress
+        </h1>
         {isLoading ? (
           <div>Loading...</div>
         ) : !data ? (
@@ -173,7 +178,7 @@ function CourseData() {
 
 function Page() {
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-2xl font-bold mb-4">This is a dashboard page</h1>
       <CourseData />
     </div>

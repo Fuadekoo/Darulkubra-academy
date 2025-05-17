@@ -2,21 +2,6 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 (async () => {
-  // Clear existing data (optional)
-  // await prisma.$transaction([
-  //   prisma.studentQuizAnswer.deleteMany(),
-  //   prisma.studentQuiz.deleteMany(),
-  //   prisma.questionAnswer.deleteMany(),
-  //   prisma.questionOption.deleteMany(),
-  //   prisma.question.deleteMany(),
-  //   prisma.studentProgress.deleteMany(),
-  //   prisma.chapter.deleteMany(),
-  //   prisma.course.deleteMany(),
-  //   prisma.coursePackage.deleteMany(),
-  //   prisma.wposWpdatatable23.deleteMany(),
-  //   prisma.admin.deleteMany(),
-  // ]);
-
   // Seed Admin
   await prisma.admin.create({
     data: {
@@ -28,7 +13,7 @@ const prisma = new PrismaClient();
   });
 
   // Seed Students
-  const students = await prisma.wpos_wpdatatable_23.createMany({
+  await prisma.wpos_wpdatatable_23.createMany({
     data: [
       {
         wdt_ID: 1001,
@@ -58,7 +43,7 @@ const prisma = new PrismaClient();
   });
 
   // Seed Packages
-  const packages = await prisma.coursePackage.createMany({
+  await prisma.coursePackage.createMany({
     data: [
       {
         id: "pkg_001",
@@ -74,7 +59,6 @@ const prisma = new PrismaClient();
         id: "pkg_003",
         name: "Data Science",
         userType: "ADULT",
-        // isPublished: false, // Unpublished package for testing
       },
     ],
   });
@@ -105,7 +89,7 @@ const prisma = new PrismaClient();
   });
 
   // Seed Courses for Programming Package
-  const progCourses = await prisma.course.createMany({
+  await prisma.course.createMany({
     data: [
       {
         id: "course_001",
@@ -131,7 +115,7 @@ const prisma = new PrismaClient();
   });
 
   // Seed Courses for Web Dev Package
-  const webCourses = await prisma.course.createMany({
+  await prisma.course.createMany({
     data: [
       {
         id: "course_101",
@@ -157,7 +141,7 @@ const prisma = new PrismaClient();
   });
 
   // Seed Chapters for Programming Basics Course
-  const progChapters = await prisma.chapter.createMany({
+  await prisma.chapter.createMany({
     data: [
       {
         id: "chapter_001",
@@ -213,85 +197,43 @@ const prisma = new PrismaClient();
     ],
   });
 
-  // Seed Exam Questions for Programming Basics Course
-  // Chapter 1 - Variables
-  const varQuestion = await prisma.question.create({
-    data: {
-      chapterId: "chapter_001",
-      question: "What is a variable in programming?",
-      questionOptions: {
-        create: [
-          { id: "opt_001", option: "A fixed value that cannot change" },
-          { id: "opt_002", option: "A named container for storing data" },
-          { id: "opt_003", option: "A type of loop" },
-          { id: "opt_004", option: "A programming language" },
-        ],
-      },
-    },
-    include: { questionOptions: true },
-  });
+  // --- SEED 5 QUESTIONS WITH OPTIONS FOR EACH CHAPTER ---
 
-  await prisma.questionAnswer.create({
-    data: {
-      questionId: varQuestion.id,
-      answerId: varQuestion.questionOptions.find(
-        (opt) => opt.option === "A named container for storing data"
-      )!.id,
-    },
-  });
+  const chapters = [
+    "chapter_001",
+    "chapter_002",
+    "chapter_003",
+    "chapter_011",
+    "chapter_012",
+  ];
 
-  // Chapter 1 - Second Question
-  const typeQuestion = await prisma.question.create({
-    data: {
-      chapterId: "chapter_001",
-      question:
-        "Which of these is NOT a primitive data type in most languages?",
-      questionOptions: {
-        create: [
-          { id: "opt_005", option: "String" },
-          { id: "opt_006", option: "Number" },
-          { id: "opt_007", option: "Boolean" },
-          { id: "opt_008", option: "Array" },
-        ],
-      },
-    },
-    include: { questionOptions: true },
-  });
+  for (const chapterId of chapters) {
+    for (let i = 1; i <= 5; i++) {
+      const question = await prisma.question.create({
+        data: {
+          chapterId,
+          question: `Sample Question ${i} for ${chapterId}`,
+          questionOptions: {
+            create: [
+              { option: `Option 1 for Q${i}` },
+              { option: `Option 2 for Q${i}` },
+              { option: `Option 3 for Q${i}` },
+              { option: `Option 4 for Q${i}` },
+            ],
+          },
+        },
+        include: { questionOptions: true },
+      });
 
-  await prisma.questionAnswer.create({
-    data: {
-      questionId: typeQuestion.id,
-      answerId: typeQuestion.questionOptions.find(
-        (opt) => opt.option === "Array"
-      )!.id,
-    },
-  });
-
-  // Chapter 2 - Control Structures
-  const loopQuestion = await prisma.question.create({
-    data: {
-      chapterId: "chapter_002",
-      question: "Which loop is guaranteed to execute at least once?",
-      questionOptions: {
-        create: [
-          { id: "opt_009", option: "for loop" },
-          { id: "opt_010", option: "while loop" },
-          { id: "opt_011", option: "do-while loop" },
-          { id: "opt_012", option: "if statement" },
-        ],
-      },
-    },
-    include: { questionOptions: true },
-  });
-
-  await prisma.questionAnswer.create({
-    data: {
-      questionId: loopQuestion.id,
-      answerId: loopQuestion.questionOptions.find(
-        (opt) => opt.option === "do-while loop"
-      )!.id,
-    },
-  });
+      // Optionally, set the first option as the correct answer
+      await prisma.questionAnswer.create({
+        data: {
+          questionId: question.id,
+          answerId: question.questionOptions[0].id,
+        },
+      });
+    }
+  }
 
   // Seed Student Progress for Completed Student
   await prisma.studentProgress.createMany({
@@ -350,40 +292,13 @@ const prisma = new PrismaClient();
     ],
   });
 
-  // Seed Quiz Attempts for Student 1
-  const quiz1 = await prisma.studentQuiz.create({
-    data: {
-      studentId: 1001,
-      questionId: varQuestion.id,
-      takenAt: new Date("2023-02-01T10:00:00"),
-      studentQuizAnswers: {
-        create: {
-          selectedOptionId: "opt_002", // Correct answer
-        },
-      },
-    },
-  });
-
-  const quiz2 = await prisma.studentQuiz.create({
-    data: {
-      studentId: 1001,
-      questionId: typeQuestion.id,
-      takenAt: new Date("2023-02-01T10:05:00"),
-      studentQuizAnswers: {
-        create: {
-          selectedOptionId: "opt_008", // Correct answer
-        },
-      },
-    },
-  });
-
   console.log("🌱 Database seeded successfully with:");
   console.log("- 1 Admin user");
   console.log("- 3 Students with different progress levels");
   console.log("- 3 Packages (2 published, 1 unpublished)");
   console.log("- 4 Courses (2 in each published package)");
   console.log("- 5 Chapters with video content");
-  console.log("- 3 Exam questions with answers");
+  console.log("- 5 Questions (with 4 options each) for every chapter");
   console.log("- Complete package history for testing");
   console.log("- Realistic student progress data");
   process.exit(0);

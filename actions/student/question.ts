@@ -1,5 +1,6 @@
 "use server";
 import { prisma } from "@/lib/db";
+import unlockingNextChapterfuad, { unlock_me } from "@/actions/student/unlock";
 // get a question for the specific chapter by pass the  chatid packageid,courseid and chapterid help me
 export async function getQuestionForActivePackageLastChapter(chatId: string) {
   // get student
@@ -494,5 +495,7 @@ export async function submitAnswers(answers: AnswerPair[], chatId: string) {
       results.push(existingAnswer);
     }
   }
+  await unlock_me(chatId);
+  // await unlockingNextChapterfuad(chatId);
   return { success: true, submitted: results.length };
 }
