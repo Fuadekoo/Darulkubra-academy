@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import useAction from "@/hooks/useAction";
 import { getPackageData } from "@/actions/student/package";
-import getStudentProgressPerChapter from "@/actions/student/chapter";
+import { getStudentProgressPerChapter } from "@/actions/student/progress";
 
 function CourseData() {
   const completecoursepersent = 66;
@@ -28,7 +28,7 @@ function CourseData() {
     "chat_001"
   );
 
-  // Assume this returns: [{ chapterId: string, isCompleted: boolean }, ...]
+  // This should return: [{ chapterId: string, isCompleted: boolean }, ...] or null/undefined
   const [chapterprogress] = useAction(
     getStudentProgressPerChapter,
     [true, (response) => console.log(response)],
@@ -38,7 +38,7 @@ function CourseData() {
 
   // Helper to get chapter progress
   function getChapterProgress(chapterId: string) {
-    if (!chapterprogress) return null;
+    if (!chapterprogress || !Array.isArray(chapterprogress)) return null;
     const found = chapterprogress.find((c: any) => c.chapterId === chapterId);
     return found ? found.isCompleted : null;
   }
@@ -141,14 +141,20 @@ function CourseData() {
                                 ? "Completed"
                                 : isCompleted === false
                                 ? "Not Completed"
-                                : "No Data"}
+                                : "Not Started"}
                             </span>
-                            <Link
-                              href={`/en/chat_001/${data.activePackage?.id}/${chapter.id}`}
-                              className="text-blue-500 hover:underline ml-4"
-                            >
-                              View Chapter
-                            </Link>
+                            {isCompleted === true ? (
+                              <Link
+                                href={`/en/chat_001/${data.activePackage?.id}/${chapter.id}`}
+                                className="text-blue-500 hover:underline ml-4"
+                              >
+                                View Chapter
+                              </Link>
+                            ) : (
+                              <span className="text-gray-400 ml-4 cursor-not-allowed">
+                                View Chapter
+                              </span>
+                            )}
                           </div>
                         );
                       })}
