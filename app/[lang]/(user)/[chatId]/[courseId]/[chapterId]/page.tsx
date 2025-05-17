@@ -16,6 +16,7 @@ import { useParams } from "next/navigation";
 function Page() {
   const params = useParams();
   const chatId = String(params.chatId);
+  const coursedata = String(params.courseId);
   const [data, refresh, isLoading] = useAction(
     getQuestionForActivePackageLastChapter,
     [true, (response) => console.log(response)],
@@ -55,15 +56,21 @@ function Page() {
         className="relative w-full"
         style={{ paddingTop: "56.25%" /* 16:9 Aspect Ratio */ }}
       >
-        <iframe
-          className="absolute top-0 left-0 w-full h-full"
-          src={`${data && "chapter" in data ? data.chapter?.videoUrl : ""}`}
-          title="Darulkubra video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
-        ></iframe>
+        {isLoading ? (
+          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100">
+            <div className="animate-pulse w-4/5 h-4/5 bg-gray-300 rounded-lg" />
+          </div>
+        ) : (
+            <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src={data && "chapter" in data ? data.chapter?.videoUrl : undefined}
+            title="Darulkubra video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            ></iframe>
+        )}
       </div>
       <div>
         {isLoading ? (
@@ -82,7 +89,7 @@ function Page() {
                 questions: data.chapter.questions,
               }}
               chatId={chatId}
-              courseId={data.courseId}
+              courseId={coursedata}
               chapterId={data.chapter.id}
             />
           )

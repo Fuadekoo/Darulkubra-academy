@@ -35,6 +35,11 @@ export async function getPackageData(chatId: string) {
       },
     },
   });
+  console.log("Student data:", student);
+  if (!student) {
+    console.log("No student found");
+    return null;
+  }
 
   return student;
 }

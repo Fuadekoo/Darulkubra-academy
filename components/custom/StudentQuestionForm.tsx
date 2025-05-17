@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import useAction from "@/hooks/useAction";
+import { correctAnswer } from "@/actions/student/question";
 import { submitAnswers } from "@/actions/student/question";
+import { unlockingNextChapterFunction } from "@/actions/student/chapter";
 import { unlockingNextChapter } from "@/actions/student/chapter";
 import { toast } from "sonner";
 
@@ -60,9 +62,9 @@ const StudentQuestionForm = ({
     );
 
     try {
-      await data(answers, chatId);
+      data(answers, chatId);
       toast.success("Answers submitted!");
-      await unlockaction(courseId, chapterId, chatId);
+      unlockingNextChapterFunction(courseId, chapterId, chatId);
       toast.success("Next chapter unlocked!");
       router.refresh();
     } catch (e) {

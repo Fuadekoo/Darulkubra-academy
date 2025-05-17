@@ -42,7 +42,6 @@ export default async function getActiveChapter(
   }
 }
 // this function is used for unlocking the next chapter
-
 let noOfTrial = 0;
 export async function unlockingNextChapter(
   courseId: string,
@@ -55,50 +54,38 @@ export async function unlockingNextChapter(
       throw new Error("Invalid input: chapterId and chat_id are required.");
     }
 
-    console.log("Fetching student with chat_id:", chat_id);
     const student = await prisma.wpos_wpdatatable_23.findFirst({
       where: { chat_id: chat_id },
     });
 
     if (!student?.wdt_ID) {
-      console.error("Student not found for chat_id:", chat_id);
       throw new Error("Student not found for the provided chat_id.");
     }
 
-    console.log(
-      "Fetching result for chapterId:",
-      chapterId,
-      "studentId:",
-      student.wdt_ID
-    );
     const { result } = await correctAnswer(chapterId, student.wdt_ID);
     if (!result) {
-      console.error("Failed to retrieve result for chapterId:", chapterId);
       throw new Error("Failed to retrieve result from correctAnswer.");
     }
 
-    console.log("Fetching previous chapter with id:", chapterId);
     const prevChapter = await prisma.chapter.findUnique({
       where: { id: chapterId },
       select: { position: true },
     });
 
     if (!prevChapter) {
-      console.error("Previous chapter not found for id:", chapterId);
       throw new Error("Previous chapter not found.");
     }
-    if (result.score == 1) {
-      console.log("creating student progress for chapterId:", chapterId);
 
-      const progress = await prisma.studentProgress.findFirst({
+    if (result.score == 1) {
+      // 1. Mark current chapter as started and completed
+      let progress = await prisma.studentProgress.findFirst({
         where: {
           studentId: student.wdt_ID,
           chapterId: chapterId,
-          isCompleted: true,
         },
       });
       if (!progress) {
-        const studentProgress = await prisma.studentProgress.create({
+        await prisma.studentProgress.create({
           data: {
             studentId: student.wdt_ID,
             chapterId: chapterId,
@@ -106,13 +93,20 @@ export async function unlockingNextChapter(
             completedAt: new Date(),
           },
         });
-
-        console.log("created student progress:", studentProgress?.isCompleted);
+      } else {
+        // Update if not already completed or started
+        if (!progress.isCompleted) {
+          await prisma.studentProgress.update({
+            where: { id: progress.id },
+            data: {
+              isCompleted: true,
+              completedAt: new Date(),
+            },
+          });
+        }
       }
-      console.log(
-        "Fetching next chapter after position:",
-        prevChapter.position
-      );
+
+      // 2. Find next chapter
       const nextChapter = await prisma.chapter.findFirst({
         where: {
           courseId: courseId,
@@ -121,40 +115,127 @@ export async function unlockingNextChapter(
       });
 
       if (nextChapter) {
-        console.log("Unlocking next chapter with id:", nextChapter.id);
-        await prisma.studentProgress.create({
-          data: {
+        // 3. Mark next chapter as started but not completed
+        let nextProgress = await prisma.studentProgress.findFirst({
+          where: {
             studentId: student.wdt_ID,
             chapterId: nextChapter.id,
           },
         });
+        if (!nextProgress) {
+          await prisma.studentProgress.create({
+            data: {
+              studentId: student.wdt_ID,
+              chapterId: nextChapter.id,
+              isCompleted: false,
+            },
+          });
+        }
+        return "you passed the exam";
       } else {
+        // No next chapter: course finished
         const course = await prisma.course.findFirst({
-          where: {
-            id: courseId,
-          },
+          where: { id: courseId },
         });
         const courseName = course?.title;
         const congra = `hello you have finished ${courseName} course thank you so much`;
-        // await sendMessage(Number(chat_id), congra);
-
         return congra;
       }
-
-      console.log("you passed the exam:", chapterId);
-      const passed = "you passed the exam";
-      return passed;
     } else {
       noOfTrial += 1;
       if (noOfTrial == 3) {
         showAnswer(chapterId);
         noOfTrial = 0;
       }
-      console.log("you Fail the exam:", chapterId);
-      const failed = "you Failed the exam";
-      return failed;
+      return "you Failed the exam";
     }
   } catch (error) {
     console.error("Error unlocking next chapter:", error);
+    throw error;
+  }
+}
+
+export async function unlockingNextChapterFunction(
+  courseId: string,
+  chapterId: string,
+  chat_id: string
+) {
+  const student = await prisma.wpos_wpdatatable_23.findFirst({
+    where: { chat_id: chat_id },
+    select: { wdt_ID: true },
+  });
+
+  if (!student?.wdt_ID) throw new Error("Student ID is undefined.");
+
+  const prevChapter = await prisma.chapter.findUnique({
+    where: { id: chapterId },
+    select: { position: true },
+  });
+
+  // 1. Mark current chapter as started and completed
+  let completeProgress = await prisma.studentProgress.findFirst({
+    where: {
+      studentId: student.wdt_ID,
+      chapterId: chapterId,
+    },
+  });
+
+  if (!completeProgress) {
+    await prisma.studentProgress.create({
+      data: {
+        studentId: student.wdt_ID,
+        chapterId: chapterId,
+        isStarted: true,
+        isCompleted: true,
+        completedAt: new Date(),
+      },
+    });
+  } else {
+    // Update if not already completed or started
+    if (!completeProgress.isCompleted || !completeProgress.isStarted) {
+      await prisma.studentProgress.update({
+        where: { id: completeProgress.id },
+        data: {
+          isStarted: true,
+          isCompleted: true,
+          completedAt: new Date(),
+        },
+      });
+    }
+  }
+
+  // 2. Find the next chapter based on position
+  if (prevChapter && prevChapter.position !== undefined) {
+    const nextChapter = await prisma.chapter.findFirst({
+      where: {
+        courseId: courseId,
+        position: prevChapter.position + 1,
+      },
+    });
+
+    if (nextChapter) {
+      // 3. Mark next chapter as started but not completed
+      let nextProgress = await prisma.studentProgress.findFirst({
+        where: {
+          studentId: student.wdt_ID,
+          chapterId: nextChapter.id,
+        },
+      });
+      if (!nextProgress) {
+        await prisma.studentProgress.create({
+          data: {
+            studentId: student.wdt_ID,
+            chapterId: nextChapter.id,
+            isStarted: true,
+            isCompleted: false,
+          },
+        });
+      } else if (!nextProgress.isStarted) {
+        await prisma.studentProgress.update({
+          where: { id: nextProgress.id },
+          data: { isStarted: true },
+        });
+      }
+    }
   }
 }

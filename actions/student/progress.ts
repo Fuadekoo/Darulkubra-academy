@@ -167,3 +167,19 @@ export async function getActivePackageProgeess(chatId: string) {
     },
   });
 }
+
+export async function getStudentProgressPerChapter(
+  chapterId: string,
+  chatId: string
+) {
+  const progress = await prisma.studentProgress.findFirst({
+    where: {
+      chapterId: chapterId,
+      student: { chat_id: chatId },
+    },
+    select: {
+      isCompleted: true,
+    },
+  });
+  return progress;
+}
