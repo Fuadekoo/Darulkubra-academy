@@ -3,10 +3,10 @@ import { prisma } from "@/lib/db";
 
 export async function unlockTest(
   chatid: string,
-  courseId: string
-  //   chapterId: string
+  courseId: string,
+  chapterId: string
 ) {
-  let chapterId = "chapter_001";
+  //   let chapterId = "chapter_001";
 
   // Get student data with courses and ordered chapters
   const student = await prisma.wpos_wpdatatable_23.findFirst({
@@ -75,12 +75,12 @@ export async function unlockTest(
   //     };
   //   }
 
-  //   if (incompleteChapterIds.includes(chapterId)) {
-  //     // Only run this block if chapterId is in incompleteChapterIds
-  //     console.log("Unlock allowed for chapter:", chapterId);
-  //   } else {
-  //     console.log("unlock fail chapter failed");
-  //   }
+  if (incompleteChapterIds.includes(chapterId)) {
+    // Only run this block if chapterId is in incompleteChapterIds
+    console.log("Unlock allowed for chapter:", chapterId);
+  } else {
+    console.log("unlock fail chapter failed");
+  }
   const sample = incompleteChapterIds[0];
   console.log("incompletedchapterid", incompleteChapterIds);
   console.log("chapterid", chapterId);
