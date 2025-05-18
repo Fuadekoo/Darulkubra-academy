@@ -97,7 +97,10 @@ export async function unlockTest(
           prisma.studentProgress.update({
             where: {
               chapterId: sample,
-              studentId_chapterId:{}
+              studentId_chapterId: {
+                studentId: student?.wdt_ID,
+                chapterId: sample,
+              },
               isCompleted: false,
             },
             data: {
@@ -106,9 +109,12 @@ export async function unlockTest(
           }),
 
           // 2. Second operation: Create Chapter 2
-          prisma.studentProgress.upsert({
-            
-            data: {chapterId:chapter.id, },
+          prisma.studentProgress.create({
+            data: {
+              studentId: student?.wdt_ID,
+              chapterId: chapter.id,
+              isCompleted: false,
+            },
           }),
         ]);
 
@@ -116,6 +122,7 @@ export async function unlockTest(
           nextCourseId: course.id,
           nextChapterId: chapter.id,
           status: "incomplete_chapter_found",
+          message: "progress is created",
         };
         console.log("UnlockTest result:", result);
         return result;
