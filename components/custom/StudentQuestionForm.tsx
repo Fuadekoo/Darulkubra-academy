@@ -9,6 +9,34 @@ import { getstudentId } from "@/actions/student/dashboard";
 import { updatePathProgressData } from "@/actions/student/progress";
 import { toast } from "sonner";
 
+// Add these SVG icons (or use your own)
+const CheckIcon = () => (
+  <svg
+    className="w-5 h-5 text-green-600 inline ml-1"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.5}
+    viewBox="0 0 24 24"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+);
+const XIcon = () => (
+  <svg
+    className="w-5 h-5 text-red-600 inline ml-1"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.5}
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18L18 6M6 6l12 12"
+    />
+  </svg>
+);
+
 interface StudentQuestionFormProps {
   chapter: {
     questions: {
@@ -28,7 +56,6 @@ const StudentQuestionForm = ({
   courseId,
   chapterId,
 }: StudentQuestionFormProps) => {
-  // For radio (single answer per question)
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<string, string>
   >({});
@@ -36,15 +63,13 @@ const StudentQuestionForm = ({
   const [feedback, setFeedback] = useState<any>(null);
   const router = useRouter();
 
-  // studentId
-  const [getStudentById, studentId] = useAction(
+  const [getStudentById] = useAction(
     getstudentId,
     [true, (response) => console.log(response)],
     chatId
   );
 
-  // update progress
-  const [progressData, refreshProgress, isLoading] = useAction(
+  const [progressData] = useAction(
     updatePathProgressData,
     [true, (response) => console.log(response)],
     chatId
@@ -52,12 +77,11 @@ const StudentQuestionForm = ({
 
   const studentIdString = String(getStudentById) || "";
 
-  const [submitAnswersAction, data, response] = useAction(submitAnswers, [
+  const [, data] = useAction(submitAnswers, [
     ,
     (response) => console.log(response),
   ]);
 
-  // Fetch correct answers and feedback
   async function fetchCorrectAnswers() {
     const res = await correctAnswer(chapterId, Number(studentIdString));
     setFeedback(res);
@@ -78,11 +102,10 @@ const StudentQuestionForm = ({
 
   async function handleSubmit() {
     if (!chapter) return;
-    // Convert selectedAnswers to expected format
     const answers = Object.entries(selectedAnswers).map(
       ([questionId, answerId]) => ({
         questionId,
-        answerId, // single answer per question
+        answerId,
       })
     );
 
@@ -126,13 +149,21 @@ const StudentQuestionForm = ({
                       question.id
                     ]?.includes(option.id);
 
+                    // Enhanced feedback coloring and icon logic
+                    let icon = null;
                     if (answered) {
                       if (isStudentSelected && isCorrectOption) {
-                        optionClass += " bg-green-300 text-white"; // correct and selected
+                        optionClass +=
+                          " bg-green-200 border-green-600 text-green-900 font-semibold";
+                        icon = <CheckIcon />;
                       } else if (isStudentSelected && !isCorrectOption) {
-                        optionClass += " bg-red-300 text-white"; // selected but wrong
+                        optionClass +=
+                          " bg-red-200 border-red-600 text-red-900 font-semibold";
+                        icon = <XIcon />;
                       } else if (!isStudentSelected && isCorrectOption) {
-                        optionClass += " bg-green-100"; // not selected but correct
+                        optionClass +=
+                          " bg-green-50 border-green-400 text-green-700";
+                        icon = <CheckIcon />;
                       } else {
                         optionClass += " bg-default-50";
                       }
@@ -156,11 +187,7 @@ const StudentQuestionForm = ({
                             disabled={showCorrect}
                           />
                           {option.option}
-                          {answered && isCorrectOption && (
-                            <span className="ml-2 text-green-600 font-bold">
-                              (Correct Answer)
-                            </span>
-                          )}
+                          {answered && icon}
                         </label>
                       </li>
                     );
@@ -175,14 +202,13 @@ const StudentQuestionForm = ({
               <Button variant="outline" onClick={handleReset}>
                 Reset
               </Button>
-                <Button
-                asChild
-                disabled={!showCorrect}
+              <Button asChild disabled={!showCorrect}>
+                <a
+                  href={`/en/${chatId}/${progressData?.chapter?.course?.id}/${progressData?.chapter?.id}`}
                 >
-                <a href={`/en/${chatId}/${progressData?.chapter?.course?.id}/${progressData?.chapter?.id}`}>
                   Next
                 </a>
-                </Button>
+              </Button>
             </div>
             {showCorrect && feedback?.result && (
               <div className="mt-6 p-4 rounded bg-slate-50 border text-center">
