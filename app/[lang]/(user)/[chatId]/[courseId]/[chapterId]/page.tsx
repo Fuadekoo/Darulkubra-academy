@@ -12,6 +12,7 @@ import useAction from "@/hooks/useAction";
 import { getQuestionForActivePackageChapterUpdate } from "@/actions/student/test";
 import StudentQuestionForm from "@/components/custom/StudentQuestionForm";
 import { packageCompleted } from "@/actions/student/progress";
+import { noProgress } from "@/actions/student/progress";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -29,6 +30,12 @@ function Page() {
     chatId,
     courseId,
     chapterId
+  );
+  const [progressData, refreshProgress, isLoadingProgress] = useAction(
+    noProgress,
+    [true, (response) => console.log(response)],
+    chatId,
+    courseId
   );
 
   // Confetti and toast on package complete
@@ -70,6 +77,41 @@ function Page() {
     // Only run on mount or when chatId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId]);
+
+  // --- NEW: Show "package not started" if noProgress is true ---
+  if (progressData === true) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <svg
+          className="w-16 h-16 text-blue-500 mb-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.5}
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z"
+          />
+        </svg>
+        <span className="text-2xl font-bold text-blue-700 mb-2">
+          Package is not started!
+        </span>
+        <span className="text-lg text-gray-600 mb-4 text-center">
+          Please go to our Telegram bot to start your package.
+        </span>
+        <a
+          href="https://t.me/MubareksBot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+        >
+          Go to Telegram
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 video-container flex flex-col gap-y-3 z-50">
@@ -124,9 +166,39 @@ function Page() {
       </div>
       <div>
         {isLoading ? (
-          <div>Loading...</div>
+          <div className="space-y-4">
+            <div className="animate-pulse flex flex-col gap-4">
+              <div className="h-6 bg-gray-200 rounded w-1/3" />
+              <div className="h-4 bg-gray-200 rounded w-2/3" />
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
+              <div className="h-10 bg-gray-200 rounded w-full mt-4" />
+              <div className="h-10 bg-gray-200 rounded w-full" />
+            </div>
+          </div>
         ) : !data ? (
-          <div>No data found.</div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <svg
+              className="w-16 h-16 text-gray-400 mb-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
+              />
+            </svg>
+            <span className="text-2xl font-semibold text-gray-700 mb-2">
+              No data found
+            </span>
+            <span className="text-gray-500 text-center mb-4">
+              We couldn't find any information for this chapter. <br />
+              Please check back later or contact support if you think this is a
+              mistake.
+            </span>
+          </div>
         ) : "message" in data ? (
           <div className="flex flex-col items-center justify-center">
             <svg

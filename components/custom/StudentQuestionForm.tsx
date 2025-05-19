@@ -1,13 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import useAction from "@/hooks/useAction";
 import { correctAnswer } from "@/actions/student/question";
 import { submitAnswers } from "@/actions/student/question";
 import { getstudentId } from "@/actions/student/dashboard";
 import { updatePathProgressData } from "@/actions/student/progress";
 import { toast } from "sonner";
+import { CheckCircle2Icon } from "lucide-react";
 
 // Add these SVG icons (or use your own)
 const CheckIcon = () => (
@@ -76,6 +77,12 @@ const StudentQuestionForm = ({
     chatId
   );
 
+  React.useEffect(() => {
+    if (progressData) {
+      // Do something with progressData
+    }
+  }, [progressData]);
+
   const studentIdString = String(getStudentById) || "";
 
   const [, data] = useAction(submitAnswers, [
@@ -133,6 +140,7 @@ const StudentQuestionForm = ({
       toast.success("Next chapter unlocked!");
       router.refresh();
     } catch (e) {
+      console.log(e);
       toast.error("Failed to submit answers.");
     }
   }
@@ -172,14 +180,14 @@ const StudentQuestionForm = ({
                       if (isStudentSelected && isCorrectOption) {
                         optionClass +=
                           " bg-green-200 border-green-600 text-green-900 font-semibold";
-                        icon = <CheckIcon />;
+                        icon = <CheckCircle2Icon />;
                       } else if (isStudentSelected && !isCorrectOption) {
                         optionClass +=
                           " bg-red-200 border-red-600 text-red-900 font-semibold";
                         icon = <XIcon />;
                       } else if (!isStudentSelected && isCorrectOption) {
                         optionClass +=
-                          " bg-green-50 border-green-400 text-green-700";
+                          " bg-yellow-50 border-yellow-400 text-green-700";
                         icon = <CheckIcon />;
                       } else {
                         optionClass += " bg-default-50";

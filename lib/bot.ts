@@ -4,7 +4,7 @@ import { InlineKeyboard } from "grammy";
 
 // Replace this with your public domain or use an environment variable
 const BASE_URL =
-  process.env.PUBLIC_URL || "https://3z36rh3j-3000.euw.devtunnels.ms/";
+  process.env.PUBLIC_URL || "https://a8c1-196-188-161-158.ngrok-free.app";
 
 const bot = new Bot("7894751055:AAFypK7odBkl9RdWDqYNb23SgasI9JU_NEA");
 

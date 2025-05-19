@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import MainMenu from "@/components/custom/main-menu";
 import MenuTitle from "@/components/custom/menu-title";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { MenuIcon } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useParams } from "next/navigation";
@@ -18,7 +18,7 @@ function ProgressSkeleton() {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const isDesktop = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -45,27 +45,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="md:grid md:grid-cols-[250px_1fr] h-screen">
       <MainMenu className="hidden md:flex" />
-      {isDesktop && (
+      {isMobile && (
         <div className="p-4 flex justify-between md:hidden sticky top-0 left-0 bg-background border-b border-border">
           <MenuTitle />
+          {/* Hamburger button outside Drawer */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 rounded-md hover:bg-gray-100"
+            aria-label="Open menu"
+          >
+            <MenuIcon />
+          </button>
           <Drawer
             direction="right"
             open={mobileMenuOpen}
             onOpenChange={(open) => setMobileMenuOpen(open)}
-            onClose={() => setMobileMenuOpen(false)}
           >
-            <DrawerTrigger>
-              <MenuIcon />
-            </DrawerTrigger>
             <DrawerContent>
               <MainMenu className="w-64" />
+              {/* Close button inside Drawer */}
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="mt-4 px-4 py-2 bg-gray-200 rounded w-full"
+              >
+                Close
+              </button>
             </DrawerContent>
           </Drawer>
         </div>
       )}
       <div className="overflow-y-auto py-2  overflow-x-hidden">
         {/* Desktop: Progress bar fixed at top, Mobile: Progress bar below menu */}
-        {!isDesktop && (
+        {!isMobile && (
           <div className="fixed top-0 w-dvw shadow-md p-4 z-40 bg-background ">
             {isLoading ? (
               <ProgressSkeleton />
@@ -79,7 +90,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             )}
           </div>
         )}
-        <div className={`px-4 ${isDesktop ? "pt-0" : "pt-10"}`}>{children}</div>
+        <div className={`px-4 ${isMobile ? "pt-0" : "pt-10"}`}>{children}</div>
       </div>
     </div>
   );

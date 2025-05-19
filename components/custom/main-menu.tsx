@@ -21,6 +21,12 @@ export default function MainMenu({ className }: { className?: string }) {
     chatId
   );
 
+  React.useEffect(() => {
+    if (refreshProgress) {
+      refreshProgress();
+    }
+  }, [refreshProgress]);
+
   // const updateCourseId
   // const updateChapterId
   return (
@@ -35,7 +41,7 @@ export default function MainMenu({ className }: { className?: string }) {
       </header>
       <ul className="py-4 grow">
         <MenuItems href={`/en/${chatId}/dashboard`}>Dashboard</MenuItems>
-        {progressData && !isLoading && (
+        {progressData && (
           <MenuItems
             href={`/en/${chatId}/${progressData.chapter.course.id}/${progressData.chapter.id}`}
           >

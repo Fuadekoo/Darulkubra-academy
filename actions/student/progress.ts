@@ -1,6 +1,29 @@
 "use server";
 import { prisma } from "@/lib/db";
 
+export async function noProgress(chatId: string, courseId: string) {
+  // gate the package usingthe courseid
+  const course = await prisma.course.findFirst({
+    where: {
+      id: courseId,
+    },
+    select: {
+      packageId: true,
+    },
+  });
+
+  const progress = await prisma.studentProgress.count({
+    where: {
+      student: { chat_id: chatId },
+      chapter: { course: { packageId: course?.packageId ?? undefined } },
+    },
+  });
+  const data = progress === 0;
+
+  console.log("No progress:", data);
+  return data;
+}
+
 export async function getStudentProgressPerPackage(
   chatId: string,
   packageId: string
