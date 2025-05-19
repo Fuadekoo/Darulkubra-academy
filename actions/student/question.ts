@@ -509,5 +509,6 @@ export async function submitAnswers(
   // await unlock(chatId);
   // await unlock_me(chatId);
   // await unlockingNextChapterfuad(chatId);
+  console.log("Answers submitted successfully:", results);
   return { success: true, submitted: results.length };
 }

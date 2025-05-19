@@ -67,11 +67,11 @@ export default function UserLayout({
 
 function Sidebar({
   sidebar,
-  setSidebar,
+  // setSidebar,
   menu,
 }: {
   sidebar: boolean;
-  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   menu: { label: string; url: string; icon: React.ReactNode }[];
 }) {
   return (
@@ -131,7 +131,7 @@ function Sidebar({
 //   );
 // }
 
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 
 function Header({
   setSidebar,

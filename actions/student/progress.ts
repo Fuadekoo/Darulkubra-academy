@@ -159,10 +159,9 @@ export async function getActivePackageProgeess(chatId: string) {
   const progress = await prisma.studentProgress.count({
     where: {
       student: { chat_id: chatId },
+      isCompleted: true,
       chapter: {
-        // course: {
-        //   packageId: packageProgress?.activePackage.id,
-        // },
+        course: { packageId: packageProgress?.activePackage?.id },
       },
     },
   });
@@ -243,15 +242,89 @@ export async function getActivePackageProgress(chatId: string) {
   }
 }
 
+export async function updatePathProgressData(chatId: string) {
+  try {
+    // Fetch the last chapter progress for the student
+    let lastChapter = await prisma.studentProgress.findFirst({
+      where: {
+        student: { chat_id: chatId },
+        isCompleted: false,
+      },
+      orderBy: {
+        chapter: {
+          createdAt: "desc",
+        },
+      },
+      select: {
+        chapter: {
+          select: {
+            id: true,
+            course: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // check nodata is found in studntprogress
+    if (!lastChapter) {
+      const firstCourse = await prisma.course.findFirst({
+        where: {
+          order: 1,
+        },
+        select: {
+          id: true,
+          chapters: {
+            where: {
+              position: 1,
+            },
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      if (firstCourse && firstCourse.chapters.length > 0) {
+        return {
+          chapter: {
+            id: firstCourse.chapters[0].id,
+            course: {
+              id: firstCourse.id,
+            },
+          },
+        };
+      } else {
+        console.error("No chapters found for the first course.");
+        throw new Error("No chapters found for the first course.");
+      }
+    }
+
+    if (lastChapter && lastChapter.chapter) {
+      console.log("Last chapter progress:", lastChapter);
+      return lastChapter;
+    } else {
+      throw new Error("No last chapter found for the student.");
+    }
+  } catch (error) {
+    console.error("Error fetching last chapter progress:", error);
+    throw error;
+  }
+}
+
 // last chapter progress then i wentt o rerutn thr last courseand chapter
 export async function pathProgressData(chatId: string) {
   try {
-    let pathData: { chapter: { id: string; course: { id: string } } } | null = null;
+    let pathData: { chapter: { id: string; course: { id: string } } };
 
     // Try to get the last chapter progress for the student
     const lastChapter = await prisma.studentProgress.findFirst({
       where: {
         student: { chat_id: chatId },
+        isCompleted: true,
       },
       orderBy: {
         chapter: {
@@ -303,7 +376,7 @@ export async function pathProgressData(chatId: string) {
           },
         };
       } else {
-        pathData = null;
+        throw new Error("No chapters found for the first course.");
       }
     }
 

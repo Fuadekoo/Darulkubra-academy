@@ -19,7 +19,7 @@ function MenuTitle() {
   const chatId = String(params.chatId);
 
   // Use useAction at the component level
-  const [progressData, refresh, isLoading] = useAction(
+  const [progressData, , isLoading] = useAction(
     getActivePackageProgress,
     [true, (response) => console.log(response)],
     chatId

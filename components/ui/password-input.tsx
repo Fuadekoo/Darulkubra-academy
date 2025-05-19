@@ -6,7 +6,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 function PasswordInput({
   className,
-  type,
+  // type,
   ...props
 }: React.ComponentProps<"input">) {
   const [showPassword, setShowPassword] = React.useState(false);

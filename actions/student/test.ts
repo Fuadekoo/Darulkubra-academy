@@ -1,8 +1,12 @@
 "use server";
 import { prisma } from "@/lib/db";
 
-// Get the next chapter for a student in their active package, with all questions and options
-export async function getQuestionForActivePackageLastChapter(chatId: string) {
+// Get the chapter and questions for a student in their active package, based on given courseId and chapterId
+export async function getQuestionForActivePackageChapterUpdate(
+  chatId: string,
+  courseid: string,
+  chapterId: string
+) {
   // 1. Get student and active package with courses and chapters
   const student = await prisma.wpos_wpdatatable_23.findFirst({
     where: {
@@ -43,7 +47,18 @@ export async function getQuestionForActivePackageLastChapter(chatId: string) {
     throw new Error("Student or active package not found.");
   }
 
-  // 2. Get all student progress for this package
+  // 2. Find the course and chapter by the given IDs
+  const course = student.activePackage.courses.find((c) => c.id === courseid);
+  if (!course) {
+    return { error: true, message: "Course not found in your active package." };
+  }
+
+  const chapter = course.chapters.find((ch) => ch.id === chapterId);
+  if (!chapter) {
+    return { error: true, message: "Chapter not found in this course." };
+  }
+
+  // 3. Get all student progress for this package
   const studentProgress = await prisma.studentProgress.findMany({
     where: {
       student: { chat_id: chatId },
@@ -55,44 +70,9 @@ export async function getQuestionForActivePackageLastChapter(chatId: string) {
   });
   const completedChapterIds = studentProgress.map((p) => p.chapterId);
 
-  // 3. Find the next chapter to work on, course by course (by order), chapter by chapter (by position)
-  let nextChapter = null;
-  let currentCourse = null;
-
-  for (const course of student.activePackage.courses) {
-    const courseChapterIds = course.chapters.map((ch) => ch.id);
-
-    // If all chapters in this course are completed, move to next course
-    const allChaptersDone =
-      courseChapterIds.length > 0 &&
-      courseChapterIds.length ===
-        courseChapterIds.filter((id) => completedChapterIds.includes(id))
-          .length &&
-      courseChapterIds.every((v) => completedChapterIds.includes(v));
-
-    if (allChaptersDone) {
-      continue; // jump to next course
-    }
-
-    // Otherwise, find the first incomplete chapter in this course (by position)
-    for (const chapter of course.chapters) {
-      if (!completedChapterIds.includes(chapter.id)) {
-        nextChapter = chapter;
-        currentCourse = course;
-        break;
-      }
-    }
-    if (nextChapter) break; // stop at the first incomplete chapter in the first incomplete course
-  }
-
-  // If all chapters are done, return a message
-  if (!nextChapter) {
-    return { message: "All chapters in the package are completed!" };
-  }
-
   // 4. Get full chapter data and questions
   const chapterData = await prisma.chapter.findUnique({
-    where: { id: nextChapter.id },
+    where: { id: chapter.id },
     select: {
       id: true,
       title: true,
@@ -120,8 +100,8 @@ export async function getQuestionForActivePackageLastChapter(chatId: string) {
     packageId: student.activePackage.id,
     packageName: student.activePackage.name,
     packageProgress: `${doneChapters}/${totalChapters}`,
-    courseId: currentCourse?.id,
-    courseTitle: currentCourse?.title,
+    courseId: course.id,
+    courseTitle: course.title,
     chapter: chapterData,
   };
   console.log(data);

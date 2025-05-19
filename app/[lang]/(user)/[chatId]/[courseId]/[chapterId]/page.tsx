@@ -9,19 +9,24 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import useAction from "@/hooks/useAction";
-import { getQuestionForActivePackageLastChapter } from "@/actions/student/test";
+// import { getQuestionForActivePackageLastChapter } from "@/actions/student/test";
+import { getQuestionForActivePackageChapterUpdate } from "@/actions/student/test";
 import StudentQuestionForm from "@/components/custom/StudentQuestionForm";
 import { useParams } from "next/navigation";
-import { unlockTest } from "@/actions/student/unlocktest";
+// import { unlockTest } from "@/actions/student/unlocktest";
 
 function Page() {
   const params = useParams();
   const chatId = String(params.chatId);
+  const chapterId = String(params.chapterId);
+  const courseId = String(params.courseId);
   const coursedata = String(params.courseId);
-  const [data, refresh, isLoading] = useAction(
-    getQuestionForActivePackageLastChapter,
+  const [data, , isLoading] = useAction(
+    getQuestionForActivePackageChapterUpdate,
     [true, (response) => console.log(response)],
-    chatId
+    chatId,
+    courseId,
+    chapterId
   );
 
   return (

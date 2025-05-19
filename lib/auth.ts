@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./db";
 import { DefaultJWT } from "next-auth/jwt";
-import { Session } from "next-auth";
+// import { Session } from "next-auth";
 import { loginSchema } from "@/lib/zodSchema";
 
 declare module "next-auth" {
@@ -40,7 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         const { phoneno, passcode } = await loginSchema.parseAsync(credentials);
         let role = null;
-        let user = await prisma.admin.findFirst({
+        const user = await prisma.admin.findFirst({
           where: { phoneno },
           select: { id: true, phoneno: true, passcode: true },
         });

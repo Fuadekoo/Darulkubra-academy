@@ -136,6 +136,7 @@ export async function unlockTest(
     completed: true,
     message: "All chapters completed",
   };
+
   console.log("UnlockTest result:", result);
   return result;
 }

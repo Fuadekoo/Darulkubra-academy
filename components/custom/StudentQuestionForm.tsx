@@ -6,6 +6,7 @@ import useAction from "@/hooks/useAction";
 import { correctAnswer } from "@/actions/student/question";
 import { submitAnswers } from "@/actions/student/question";
 import { getstudentId } from "@/actions/student/dashboard";
+import { updatePathProgressData } from "@/actions/student/progress";
 import { toast } from "sonner";
 
 interface StudentQuestionFormProps {
@@ -38,6 +39,13 @@ const StudentQuestionForm = ({
   // studentId
   const [getStudentById, studentId] = useAction(
     getstudentId,
+    [true, (response) => console.log(response)],
+    chatId
+  );
+
+  // update progress
+  const [progressData, refreshProgress, isLoading] = useAction(
+    updatePathProgressData,
     [true, (response) => console.log(response)],
     chatId
   );
@@ -167,7 +175,14 @@ const StudentQuestionForm = ({
               <Button variant="outline" onClick={handleReset}>
                 Reset
               </Button>
-              <Button>Next</Button>
+                <Button
+                asChild
+                disabled={!showCorrect}
+                >
+                <a href={`/en/${chatId}/${progressData?.chapter?.course?.id}/${progressData?.chapter?.id}`}>
+                  Next
+                </a>
+                </Button>
             </div>
             {showCorrect && feedback?.result && (
               <div className="mt-6 p-4 rounded bg-slate-50 border text-center">

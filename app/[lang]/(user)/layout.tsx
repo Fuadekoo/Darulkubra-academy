@@ -26,7 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [total, setTotal] = useState(1); // set to 1 to avoid division by zero
 
   // UseAction for progress data
-  const [progressData, refresh, isLoading] = useAction(
+  const [progressData, , isLoading] = useAction(
     getActivePackageProgress,
     [true, (response) => console.log(response)],
     String(useParams().chatId)

@@ -1,6 +1,4 @@
 import React from "react";
-import UserLayout from "@/components/custom/userLayout";
-import { Home, PersonStandingIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "../../../../lib/auth";
 export default async function layout({
@@ -34,7 +32,7 @@ export default async function layout({
           },
         ]}
       > */}
-        {children}
+      {children}
       {/* </UserLayout> */}
     </div>
   );

@@ -7,18 +7,22 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LightDarkToggle } from "@/components/ui/light-dark-toggle";
 import { cn } from "@/lib/utils";
 import useAction from "@/hooks/useAction";
-import { pathProgressData } from "@/actions/student/progress";
+// import { pathProgressData } from "@/actions/student/progress";
+import { updatePathProgressData } from "@/actions/student/progress";
 // import { pathProgress } from "@/actions/student/progress";
 import { useParams } from "next/navigation";
 
 export default function MainMenu({ className }: { className?: string }) {
   const params = useParams();
   const chatId = String(params.chatId);
-  const [progressData, refresh, isLoading] = useAction(
-    pathProgressData,
+  const [progressData, refreshProgress, isLoading] = useAction(
+    updatePathProgressData,
     [true, (response) => console.log(response)],
     chatId
   );
+
+  // const updateCourseId
+  // const updateChapterId
   return (
     <nav
       className={cn(
@@ -31,11 +35,13 @@ export default function MainMenu({ className }: { className?: string }) {
       </header>
       <ul className="py-4 grow">
         <MenuItems href={`/en/${chatId}/dashboard`}>Dashboard</MenuItems>
-        <MenuItems
-          href={`/en/${chatId}/${progressData?.chapter.course.id}/${progressData?.chapter.id}`}
-        >
-          courses
-        </MenuItems>
+        {progressData && !isLoading && (
+          <MenuItems
+            href={`/en/${chatId}/${progressData.chapter.course.id}/${progressData.chapter.id}`}
+          >
+            courses
+          </MenuItems>
+        )}
       </ul>
       <footer className="flex items-center gap-2">
         <Avatar>
