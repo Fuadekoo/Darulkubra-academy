@@ -386,3 +386,71 @@ export async function pathProgressData(chatId: string) {
     throw error;
   }
 }
+
+export async function packageCompleted(chatid: string) {
+  // Get student data with courses and ordered chapters
+  const student = await prisma.wpos_wpdatatable_23.findFirst({
+    where: {
+      chat_id: chatid,
+      status: { in: ["active", "notyet"] },
+    },
+    select: {
+      wdt_ID: true,
+      activePackage: {
+        select: {
+          id: true,
+          name: true,
+          courses: {
+            select: {
+              id: true,
+              chapters: {
+                select: {
+                  id: true,
+                  title: true,
+                  position: true,
+                },
+                orderBy: { position: "asc" },
+              },
+            },
+            orderBy: { order: "asc" },
+          },
+        },
+      },
+    },
+  });
+
+  if (!student?.activePackage?.courses?.length) {
+    return { completed: true, message: "No courses found" };
+  }
+
+  // i went gate all studtentchapter and set in aray
+  const allChapters = student.activePackage.courses.flatMap((course) =>
+    course.chapters.map((chapter) => chapter.id)
+  );
+
+  // Get completed chapter IDs
+  const currentStudentProgress = await prisma.studentProgress.findMany({
+    where: {
+      studentId: student?.wdt_ID,
+      chapter: { course: { packageId: student?.activePackage?.id } },
+      isCompleted: true,
+    },
+    select: {
+      chapterId: true,
+      // isCompleted: true,
+    },
+  });
+
+  // then i went tto compare  allChapters with currentStudentProgress
+  // console.log(bk.length == bk.length && ak.every((v) => bk.includes(v)));
+  //  const response = allChapters.length && allChapters.every((v)=> currentStudentProgress.includes(v));
+  const completedChapterIds = currentStudentProgress.map(
+    (progress) => progress.chapterId
+  );
+  const response =
+    allChapters.length > 0 &&
+    allChapters.every((chapterId) => completedChapterIds.includes(chapterId));
+
+  console.log("package is finished", response);
+  return response;
+}

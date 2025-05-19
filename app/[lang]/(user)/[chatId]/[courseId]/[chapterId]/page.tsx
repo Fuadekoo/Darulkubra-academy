@@ -9,11 +9,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import useAction from "@/hooks/useAction";
-// import { getQuestionForActivePackageLastChapter } from "@/actions/student/test";
 import { getQuestionForActivePackageChapterUpdate } from "@/actions/student/test";
 import StudentQuestionForm from "@/components/custom/StudentQuestionForm";
+import { packageCompleted } from "@/actions/student/progress";
 import { useParams } from "next/navigation";
-// import { unlockTest } from "@/actions/student/unlocktest";
+import { toast } from "sonner";
+import confetti from "canvas-confetti";
 
 function Page() {
   const params = useParams();
@@ -21,6 +22,7 @@ function Page() {
   const chapterId = String(params.chapterId);
   const courseId = String(params.courseId);
   const coursedata = String(params.courseId);
+
   const [data, , isLoading] = useAction(
     getQuestionForActivePackageChapterUpdate,
     [true, (response) => console.log(response)],
@@ -28,6 +30,46 @@ function Page() {
     courseId,
     chapterId
   );
+
+  // Confetti and toast on package complete
+  React.useEffect(() => {
+    async function checkPackage() {
+      const completed = await packageCompleted(chatId);
+      if (completed) {
+        toast.success("🎉 Congratulations! You have completed the package.", {
+          duration: 5000,
+        });
+
+        // Confetti side cannons
+        const end = Date.now() + 2 * 1000;
+        const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+        const frame = () => {
+          if (Date.now() > end) return;
+          confetti({
+            particleCount: 2,
+            angle: 60,
+            spread: 55,
+            startVelocity: 60,
+            origin: { x: 0, y: 0.5 },
+            colors,
+          });
+          confetti({
+            particleCount: 2,
+            angle: 120,
+            spread: 55,
+            startVelocity: 60,
+            origin: { x: 1, y: 0.5 },
+            colors,
+          });
+          requestAnimationFrame(frame);
+        };
+        frame();
+      }
+    }
+    checkPackage();
+    // Only run on mount or when chatId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId]);
 
   return (
     <div className="p-3 video-container flex flex-col gap-y-3 z-50">
@@ -41,14 +83,12 @@ function Page() {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink>
-              {" "}
               {data && "packageName" in data ? data.courseTitle : "courseName"}
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage>
-              {" "}
               {data && "packageName" in data
                 ? data.chapter?.title
                 : "chapterName"}
@@ -119,8 +159,6 @@ function Page() {
             />
           )
         )}
-
-        {/* student question page */}
       </div>
     </div>
   );
