@@ -117,6 +117,8 @@ export async function unlockTest(
             },
           }),
         ]);
+        console.log("fuad next courseid", course.id);
+        console.log("fuad next chapterid", chapter.id);
 
         const result = {
           nextCourseId: course.id,
@@ -129,6 +131,23 @@ export async function unlockTest(
       }
     }
     // If all chapters in this course are completed, move to next course
+  }
+
+  // If we reach here, all chapters are completed, so update the last incomplete chapter as completed
+  if (incompleteChapterIds.length > 0) {
+    await prisma.studentProgress.update({
+      where: {
+        chapterId: incompleteChapterIds[0],
+        studentId_chapterId: {
+          studentId: student?.wdt_ID,
+          chapterId: incompleteChapterIds[0],
+        },
+        isCompleted: false,
+      },
+      data: {
+        isCompleted: true,
+      },
+    });
   }
 
   // All chapters in all courses are completed
