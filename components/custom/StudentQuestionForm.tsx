@@ -56,8 +56,9 @@ const StudentQuestionForm = ({
   courseId,
   chapterId,
 }: StudentQuestionFormProps) => {
+  // Now each questionId maps to an array of selected optionIds
   const [selectedAnswers, setSelectedAnswers] = useState<
-    Record<string, string>
+    Record<string, string[]>
   >({});
   const [showCorrect, setShowCorrect] = useState(false);
   const [feedback, setFeedback] = useState<any>(null);
@@ -87,11 +88,24 @@ const StudentQuestionForm = ({
     setFeedback(res);
   }
 
+  // Handle checkbox change
   const handleOptionChange = (questionId: string, optionId: string) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionId,
-    }));
+    setSelectedAnswers((prev) => {
+      const prevSelected = prev[questionId] || [];
+      if (prevSelected.includes(optionId)) {
+        // Remove if already selected
+        return {
+          ...prev,
+          [questionId]: prevSelected.filter((id) => id !== optionId),
+        };
+      } else {
+        // Add if not selected
+        return {
+          ...prev,
+          [questionId]: [...prevSelected, optionId],
+        };
+      }
+    });
   };
 
   const handleReset = () => {
@@ -102,11 +116,13 @@ const StudentQuestionForm = ({
 
   async function handleSubmit() {
     if (!chapter) return;
-    const answers = Object.entries(selectedAnswers).map(
-      ([questionId, answerId]) => ({
-        questionId,
-        answerId,
-      })
+    // Transform selectedAnswers into an array of { questionId, answerId }
+    const answers = Object.entries(selectedAnswers).flatMap(
+      ([questionId, answerIds]) =>
+        answerIds.map((answerId) => ({
+          questionId,
+          answerId,
+        }))
     );
 
     try {
@@ -140,8 +156,9 @@ const StudentQuestionForm = ({
                   {question.questionOptions.map((option) => {
                     let optionClass = "p-2 border rounded-md bg-white";
                     const answered = showCorrect && feedback;
-                    const isSelected =
-                      selectedAnswers[question.id] === option.id;
+                    const isSelected = (
+                      selectedAnswers[question.id] || []
+                    ).includes(option.id);
                     const isStudentSelected = feedback?.studentResponse?.[
                       question.id
                     ]?.includes(option.id);
@@ -177,10 +194,10 @@ const StudentQuestionForm = ({
                       <li key={option.id} className={optionClass}>
                         <label className="flex items-center gap-x-2">
                           <input
-                            type="radio"
+                            type="checkbox"
                             name={`question-${question.id}`}
                             value={option.id}
-                            checked={selectedAnswers[question.id] === option.id}
+                            checked={isSelected}
                             onChange={() =>
                               handleOptionChange(question.id, option.id)
                             }
