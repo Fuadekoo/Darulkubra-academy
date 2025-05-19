@@ -1,4 +1,5 @@
 "use server";
+import sendMessage from "@/lib/bot";
 import { prisma } from "@/lib/db";
 
 export async function unlockTest(
@@ -19,6 +20,7 @@ export async function unlockTest(
       activePackage: {
         select: {
           id: true,
+          name: true,
           courses: {
             select: {
               id: true,
@@ -148,6 +150,8 @@ export async function unlockTest(
         isCompleted: true,
       },
     });
+    const congraMessage = `Congratulations! You have completed the chapter in the package "${student?.activePackage?.name}".`;
+    await sendMessage(Number(chatid), congraMessage);
   }
 
   // All chapters in all courses are completed
