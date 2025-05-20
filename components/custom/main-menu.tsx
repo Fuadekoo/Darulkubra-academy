@@ -88,62 +88,51 @@ export default function MainMenu({ className }: { className?: string }) {
         <div className="flex justify-center items-center py-8">Loading...</div>
       ) : (
         <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>{data.activePackage?.name}</AccordionTrigger>
-            <AccordionContent>
-              {data.activePackage?.courses.map((course: any) => (
-                <div key={course.id} className="p-4 border-b">
-                  <h3 className="text-lg font-semibold">{course.title}</h3>
-                  <p className="text-sm text-gray-500">{course.title}</p>
-                  <div>
-                    {course.chapters.map((chapter: any) => {
-                      const isCompleted = chapterProgress?.[chapter.id];
-
-                      return (
-                        <div key={chapter.id} className="p-4 border-b">
-                          <h3 className="text-lg font-semibold">
-                            {chapter.title}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            {chapter.title}
-                          </p>
-                          <span>position: {chapter.position}</span>
-                          <span
-                            className={`ml-2 px-2 py-1 rounded text-xs font-semibold
-                              ${
-                                isCompleted === true
-                                  ? "bg-green-100 text-green-700"
-                                  : isCompleted === false
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-gray-100 text-gray-500"
-                              }`}
-                          >
-                            {isCompleted === true
-                              ? "Completed"
+          <h3 className="font-bold mb-2">{data.activePackage?.name}</h3>
+          {data.activePackage?.courses.map((course: any, idx: number) => (
+            <AccordionItem key={course.id} value={`course-${course.id}`}>
+              <AccordionTrigger>{course.title}</AccordionTrigger>
+              <AccordionContent>
+                {course.chapters.map((chapter: any) => {
+                  const isCompleted = chapterProgress?.[chapter.id];
+                  return (
+                    <div key={chapter.id} className="p-4 border-b">
+                      <span>lesson: {chapter.position}</span>
+                      <p className="text-sm text-gray-500">{chapter.title}</p>
+                      <span
+                        className={`ml-2 px-2 py-1 rounded text-xs font-semibold
+                          ${
+                            isCompleted === true
+                              ? "bg-green-100 text-green-700"
                               : isCompleted === false
-                              ? "Not Completed"
-                              : "Not Started"}
-                          </span>
-                          {isCompleted === true ? (
-                            <Link
-                              href={`/en/${chatId}/${data.activePackage?.courses[0].id}/${chapter.id}`}
-                              className="text-blue-500 hover:underline ml-4"
-                            >
-                              View Chapter
-                            </Link>
-                          ) : (
-                            <span className="text-gray-400 ml-4 cursor-not-allowed">
-                              View Chapter
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-500"
+                          }`}
+                      >
+                        {isCompleted === true
+                          ? "Completed"
+                          : isCompleted === false
+                          ? "Not Completed"
+                          : "Not Started"}
+                      </span>
+                      {isCompleted === true ? (
+                        <Link
+                          href={`/en/${chatId}/${course.id}/${chapter.id}`}
+                          className="text-blue-500 hover:underline ml-4"
+                        >
+                          View Chapter
+                        </Link>
+                      ) : (
+                        <span className="text-gray-400 ml-4 cursor-not-allowed">
+                          View Chapter
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
         </Accordion>
       )}
 
