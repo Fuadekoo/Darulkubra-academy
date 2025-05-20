@@ -13,12 +13,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-// import { pathProgressData } from "@/actions/student/progress";
 import { getStudentProgressPerChapter } from "@/actions/student/progress";
 import { updatePathProgressData } from "@/actions/student/progress";
 import { getPackageData } from "@/actions/student/package";
-// import { pathProgress } from "@/actions/student/progress";
 import { useParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function MainMenu({ className }: { className?: string }) {
   const params = useParams();
@@ -95,38 +94,52 @@ export default function MainMenu({ className }: { className?: string }) {
               <AccordionContent>
                 {course.chapters.map((chapter: any) => {
                   const isCompleted = chapterProgress?.[chapter.id];
+                  const chapterLink = `/en/${chatId}/${course.id}/${chapter.id}`;
                   return (
-                    <div key={chapter.id} className="p-4 border-b">
+                    // <MenuItems
+
+                    <div
+                      key={chapter.id}
+                      className={cn(
+                        "block p-2 hover:bg-primary hover:text-foreground hover:rounded-md hover:shadow transition-colors text-muted-foreground"
+                      )}
+                    >
                       <span>lesson: {chapter.position}</span>
-                      <p className="text-sm text-gray-500">{chapter.title}</p>
+                      <button
+                        disabled={!isCompleted}
+                        className={cn(
+                          "text-left text-sm text-gray-700 hover:underline focus:outline-none ml-2",
+                          !isCompleted
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-blue-500"
+                        )}
+                        onClick={() => {
+                          if (isCompleted) {
+                            window.location.href = chapterLink;
+                          }
+                        }}
+                        tabIndex={isCompleted ? 0 : -1}
+                        aria-disabled={!isCompleted}
+                        type="button"
+                      >
+                        {chapter.title}
+                      </button>
                       <span
-                        className={`ml-2 px-2 py-1 rounded text-xs font-semibold
-                          ${
-                            isCompleted === true
-                              ? "bg-green-100 text-green-700"
-                              : isCompleted === false
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
+                        className={cn(
+                          "ml-0 px-0 py-0 rounded text-xs font-semibold",
+                          isCompleted === true
+                            ? ""
+                            : isCompleted === false
+                            ? ""
+                            : ""
+                        )}
                       >
                         {isCompleted === true
-                          ? "Completed"
+                          ? "🔓"
                           : isCompleted === false
-                          ? "Not Completed"
-                          : "Not Started"}
+                          ? "🔐"
+                          : "🗝️"}
                       </span>
-                      {isCompleted === true ? (
-                        <Link
-                          href={`/en/${chatId}/${course.id}/${chapter.id}`}
-                          className="text-blue-500 hover:underline ml-4"
-                        >
-                          View Chapter
-                        </Link>
-                      ) : (
-                        <span className="text-gray-400 ml-4 cursor-not-allowed">
-                          View Chapter
-                        </span>
-                      )}
                     </div>
                   );
                 })}
@@ -142,9 +155,7 @@ export default function MainMenu({ className }: { className?: string }) {
             TP
           </AvatarFallback>
         </Avatar>
-        <Link href="/" className="hover:underLine">
-          Logout
-        </Link>
+
         <LightDarkToggle className="ml-auto" />
       </footer>
     </nav>
