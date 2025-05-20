@@ -31,20 +31,31 @@ function CourseData() {
     chatId
   );
 
-  // This should return: [{ chapterId: string, isCompleted: boolean }, ...] or null/undefined
-  const [chapterprogress, refreshdata, isLoadingProgress] = useAction(
-    getStudentProgressPerChapter,
-    [true, (response) => console.log(response)],
-    "chapter_001",
-    "chat_001"
-  );
+  // State to hold progress for all chapters
+  const [chapterProgress, setChapterProgress] = React.useState<
+    Record<string, boolean | null>
+  >({});
 
-  // Helper to get chapter progress
-  function getChapterProgress(chapterId: string) {
-    if (!chapterprogress || !Array.isArray(chapterprogress)) return null;
-    const found = chapterprogress.find((c: any) => c.chapterId === chapterId);
-    return found ? found.isCompleted : null;
-  }
+  // Fetch progress for all chapters when data is loaded
+  React.useEffect(() => {
+    async function fetchAllProgress() {
+      if (!data || !data.activePackage) return;
+      const allChapters = data.activePackage.courses.flatMap(
+        (course: any) => course.chapters
+      );
+      const progressEntries = await Promise.all(
+        allChapters.map(async (chapter: any) => {
+          const result = await getStudentProgressPerChapter(chapter.id, chatId);
+          return [chapter.id, result?.isCompleted ?? null] as [
+            string,
+            boolean | null
+          ];
+        })
+      );
+      setChapterProgress(Object.fromEntries(progressEntries));
+    }
+    fetchAllProgress();
+  }, [data, chatId]);
 
   return (
     <div className="m-4">
@@ -123,7 +134,8 @@ function CourseData() {
                     <p className="text-sm text-gray-500">{course.title}</p>
                     <div>
                       {course.chapters.map((chapter: any) => {
-                        const isCompleted = getChapterProgress(chapter.id);
+                        const isCompleted = chapterProgress[chapter.id];
+
                         return (
                           <div key={chapter.id} className="p-4 border-b">
                             <h3 className="text-lg font-semibold">
@@ -151,7 +163,7 @@ function CourseData() {
                             </span>
                             {isCompleted === true ? (
                               <Link
-                                href={`/en/chat_001/${data.activePackage?.id}/${chapter.id}`}
+                                href={`/en/${chatId}/${data.activePackage?.courses[0].id}/${chapter.id}`}
                                 className="text-blue-500 hover:underline ml-4"
                               >
                                 View Chapter

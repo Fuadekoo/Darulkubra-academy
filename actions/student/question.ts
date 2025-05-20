@@ -1,6 +1,7 @@
 "use server";
 import { prisma } from "@/lib/db";
 import { unlockingNextChapter } from "@/actions/student/unlock";
+// import {correctAnswer} from "@/actions/student/question";
 import { unlockTest } from "@/actions/student/unlocktest";
 // get a question for the specific chapter by pass the  chatid packageid,courseid and chapterid help me
 export async function getQuestionForActivePackageLastChapter(chatId: string) {
@@ -504,7 +505,15 @@ export async function submitAnswers(
       results.push(existingAnswer);
     }
   }
-  await unlockTest(chatId, courseId, chapterId);
+
+  const score = await correctAnswer(chapterId, studentId);
+  // if the the score is above 0.5 then excite the unlock test  else  display message only
+  if (score.result.score === 1) {
+    await unlockTest(chatId, courseId, chapterId);
+  } else {
+    console.log("Score below threshold, not unlocking test.");
+  }
+
   // await unlockingNextChapter(chatId, courseId, chapterId, packageId ?? "");
   // await unlock(chatId);
   // await unlock_me(chatId);
