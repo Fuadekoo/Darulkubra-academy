@@ -146,6 +146,11 @@ const StudentQuestionForm = ({
   }
 
   let questionNo = 1;
+  const allAnswered =
+    chapter?.questions.every(
+      (q) => selectedAnswers[q.id] && selectedAnswers[q.id].length > 0
+    ) ?? false;
+
   return (
     <div className="mt-2">
       <div className="mt-4">
@@ -220,20 +225,34 @@ const StudentQuestionForm = ({
                 </ul>
               </div>
             ))}
+
             <div className="flex gap-4 mt-4">
-              <Button onClick={handleSubmit} disabled={showCorrect}>
+              <Button
+                onClick={handleSubmit}
+                disabled={!allAnswered || showCorrect}
+              >
                 Submit Answers
               </Button>
-              <Button variant="outline" onClick={handleReset}>
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={!showCorrect}
+              >
                 Reset
               </Button>
-              <Button asChild disabled={!showCorrect}>
-                <a
+                {showCorrect && feedback?.result?.score === 1 ? (
+                <Button asChild>
+                  <a
                   href={`/en/${chatId}/${progressData?.chapter?.course?.id}/${progressData?.chapter?.id}`}
-                >
+                  >
                   Next
-                </a>
-              </Button>
+                  </a>
+                </Button>
+                ) : showCorrect && feedback?.result?.score !== 1 ? (
+                <div className="text-red-600 font-semibold flex items-center">
+                  You failed the exam. Please try again.
+                </div>
+                ) : null}
             </div>
             {showCorrect && feedback?.result && (
               <div className="mt-6 p-4 rounded bg-slate-50 border text-center">
