@@ -9,6 +9,7 @@ import { getstudentId } from "@/actions/student/dashboard";
 import { updatePathProgressData } from "@/actions/student/progress";
 import { toast } from "sonner";
 import { CheckCircle2Icon } from "lucide-react";
+import Link from "next/link";
 
 // Add these SVG icons (or use your own)
 const CheckIcon = () => (
@@ -71,9 +72,11 @@ const StudentQuestionForm = ({
     chatId
   );
 
-  const [progressData] = useAction(
+  //  const refresh next buttom
+
+  const [progressData, refreshProgress] = useAction(
     updatePathProgressData,
-    [true, (response) => console.log(response)],
+    [true, (response) => console.log("AK >> ", response)],
     chatId
   );
 
@@ -138,7 +141,7 @@ const StudentQuestionForm = ({
       await fetchCorrectAnswers();
       setShowCorrect(true);
       toast.success("Next chapter unlocked!");
-      router.refresh();
+      refreshProgress?.();
     } catch (e) {
       console.log(e);
       toast.error("Failed to submit answers.");
@@ -240,19 +243,19 @@ const StudentQuestionForm = ({
               >
                 Reset
               </Button>
-                {showCorrect && feedback?.result?.score === 1 ? (
+              {showCorrect && feedback?.result?.score === 1 ? (
                 <Button asChild>
-                  <a
-                  href={`/en/${chatId}/${progressData?.chapter?.course?.id}/${progressData?.chapter?.id}`}
+                  <Link
+                    href={`/en/${chatId}/${progressData?.chapter?.course?.id}/${progressData?.chapter?.id}`}
                   >
-                  Next
-                  </a>
+                    Next
+                  </Link>
                 </Button>
-                ) : showCorrect && feedback?.result?.score !== 1 ? (
+              ) : showCorrect && feedback?.result?.score !== 1 ? (
                 <div className="text-red-600 font-semibold flex items-center">
                   You failed the exam. Please try again.
                 </div>
-                ) : null}
+              ) : null}
             </div>
             {showCorrect && feedback?.result && (
               <div className="mt-6 p-4 rounded bg-slate-50 border text-center">
